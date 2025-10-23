@@ -29,3 +29,4 @@ frontend/*.local
 Thumbs.db
 
 firebase-credentials.json
+"firebase-credentials.json" 
