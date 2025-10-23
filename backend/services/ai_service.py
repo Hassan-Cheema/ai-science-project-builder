@@ -2,14 +2,30 @@ from openai import AsyncOpenAI
 from config import settings
 import json
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+# Initialize OpenAI client
+client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
+
+# Try to import Gemini service
+try:
+    from .gemini_service import gemini_service
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
 
 async def generate_project_idea(topic: str = None) -> dict:
     """
-    Generate a science project idea and hypothesis using OpenAI GPT-4o mini
+    Generate a science project idea and hypothesis using OpenAI or Gemini
     """
-    if not settings.OPENAI_API_KEY:
-        raise ValueError("OpenAI API key not configured")
+    # Try Gemini first (free), fallback to OpenAI
+    if GEMINI_AVAILABLE and settings.GEMINI_API_KEY and gemini_service.available:
+        try:
+            return await gemini_service.generate_project_idea(topic or "general science", "8")
+        except Exception as e:
+            print(f"⚠️ Gemini failed, trying OpenAI fallback: {e}")
+    
+    # Fallback to OpenAI
+    if not client:
+        raise ValueError("No AI service configured (neither Gemini nor OpenAI)")
     
     prompt = f"""Generate a creative and feasible science project idea.
 {'Topic: ' + topic if topic else 'Choose any interesting scientific topic.'}
@@ -42,8 +58,16 @@ async def generate_report_content(idea: str, hypothesis: str, graph_description:
     """
     Generate a comprehensive markdown report combining idea, hypothesis, and graph analysis
     """
-    if not settings.OPENAI_API_KEY:
-        raise ValueError("OpenAI API key not configured")
+    # Try Gemini first (free), fallback to OpenAI
+    if GEMINI_AVAILABLE and settings.GEMINI_API_KEY and gemini_service.available:
+        try:
+            return await gemini_service.generate_report(idea, hypothesis, graph_description)
+        except Exception as e:
+            print(f"⚠️ Gemini failed, trying OpenAI fallback: {e}")
+    
+    # Fallback to OpenAI
+    if not client:
+        raise ValueError("No AI service configured (neither Gemini nor OpenAI)")
     
     prompt = f"""Create a comprehensive science project report in markdown format.
 

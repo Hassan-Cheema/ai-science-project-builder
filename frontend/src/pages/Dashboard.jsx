@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import api from '../config/api';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [apiStatus, setApiStatus] = useState('checking...');
+  const [subscriptionStatus, setSubscriptionStatus] = useState('free'); // 'free', 'student', 'educator'
 
   useEffect(() => {
     checkApiConnection();
+    // In a real app, fetch subscription status from your backend
   }, []);
 
   const checkApiConnection = async () => {
@@ -20,61 +23,142 @@ const Dashboard = () => {
     }
   };
 
+  const handleSubscribe = (plan) => {
+    // Placeholder URL - replace with actual Lemon Squeezy checkout URL
+    const checkoutUrls = {
+      student: 'https://lemonsqueezy.com/checkout/buy/YOUR-STUDENT-PLAN-ID',
+      educator: 'https://lemonsqueezy.com/checkout/buy/YOUR-EDUCATOR-PLAN-ID'
+    };
+
+    // Open checkout in new window
+    window.open(checkoutUrls[plan], '_blank');
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
-        
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
+    <div className="min-h-screen bg-notion-lightgray py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-notion-text mb-2">Welcome back!</h1>
+              <p className="text-notion-gray">Manage your projects and subscription</p>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
-                Welcome to your dashboard! You are successfully authenticated.
+            {subscriptionStatus === 'free' && (
+              <button
+                onClick={() => handleSubscribe('student')}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                ⚡ Upgrade to Pro
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Subscription Status */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-notion-text mb-1">Current Plan</h2>
+              <p className="text-2xl font-bold text-notion-blue capitalize">{subscriptionStatus}</p>
+              <p className="text-sm text-notion-gray mt-1">
+                {subscriptionStatus === 'free' && '3 projects remaining this month'}
+                {subscriptionStatus === 'student' && 'Unlimited projects'}
+                {subscriptionStatus === 'educator' && 'Unlimited projects + 30 student accounts'}
               </p>
             </div>
+            {subscriptionStatus === 'free' && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSubscribe('student')}
+                  className="bg-notion-blue hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Upgrade to Student
+                </button>
+                <button
+                  onClick={() => handleSubscribe('educator')}
+                  className="border-2 border-notion-blue text-notion-blue hover:bg-notion-lightblue px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Upgrade to Educator
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">User Information</h2>
-            <dl className="space-y-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Email</dt>
-                <dd className="text-sm text-gray-900">{user?.email}</dd>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-notion-gray">Projects Created</h3>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-xl">📊</span>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">User ID</dt>
-                <dd className="text-sm text-gray-900 break-all">{user?.uid}</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">API Status</h2>
-            <div className="flex items-center space-x-2">
-              <div className={`h-3 w-3 rounded-full ${apiStatus === 'healthy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-sm text-gray-900 capitalize">{apiStatus}</span>
             </div>
+            <p className="text-3xl font-bold text-notion-text">0</p>
+            <p className="text-sm text-notion-gray mt-1">All time</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-notion-gray">API Status</h3>
+              <div className={`h-3 w-3 rounded-full ${apiStatus === 'healthy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            </div>
+            <p className="text-3xl font-bold text-notion-text capitalize">{apiStatus}</p>
+            <p className="text-sm text-notion-gray mt-1">Backend connection</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-notion-gray">Account</h3>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-xl">✓</span>
+              </div>
+            </div>
+            <p className="text-lg font-semibold text-notion-text truncate">{user?.email || 'Guest'}</p>
+            <p className="text-sm text-notion-gray mt-1">Active member</p>
           </div>
         </div>
 
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 rounded-md font-medium transition-colors">
-              Create New Project
+        {/* Quick Actions */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+          <h2 className="text-xl font-semibold text-notion-text mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              to="/try"
+              className="flex flex-col items-center justify-center p-6 bg-notion-lightgray hover:bg-gray-200 rounded-xl transition-colors text-center"
+            >
+              <div className="w-12 h-12 bg-notion-blue rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="font-semibold text-notion-text">New Project</h3>
+              <p className="text-xs text-notion-gray mt-1">Generate idea</p>
+            </Link>
+
+            <button className="flex flex-col items-center justify-center p-6 bg-notion-lightgray hover:bg-gray-200 rounded-xl transition-colors text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">📁</span>
+              </div>
+              <h3 className="font-semibold text-notion-text">My Projects</h3>
+              <p className="text-xs text-notion-gray mt-1">View saved</p>
             </button>
-            <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-md font-medium transition-colors">
-              View Analytics
-            </button>
-            <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-md font-medium transition-colors">
-              Settings
+
+            <Link
+              to="/pricing"
+              className="flex flex-col items-center justify-center p-6 bg-notion-lightgray hover:bg-gray-200 rounded-xl transition-colors text-center"
+            >
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">💎</span>
+              </div>
+              <h3 className="font-semibold text-notion-text">View Plans</h3>
+              <p className="text-xs text-notion-gray mt-1">Compare pricing</p>
+            </Link>
+
+            <button className="flex flex-col items-center justify-center p-6 bg-notion-lightgray hover:bg-gray-200 rounded-xl transition-colors text-center">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                <span className="text-2xl">⚙️</span>
+              </div>
+              <h3 className="font-semibold text-notion-text">Settings</h3>
+              <p className="text-xs text-notion-gray mt-1">Account config</p>
             </button>
           </div>
         </div>

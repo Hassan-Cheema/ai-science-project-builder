@@ -18,6 +18,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      // Firebase not initialized, skip auth
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Get Firebase token and store it
@@ -35,19 +41,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signup = (email, password) => {
+    if (!auth) throw new Error('Firebase not configured');
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
   const login = (email, password) => {
+    if (!auth) throw new Error('Firebase not configured');
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   const loginWithGoogle = () => {
+    if (!auth) throw new Error('Firebase not configured');
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
   };
 
   const logout = () => {
+    if (!auth) throw new Error('Firebase not configured');
     return signOut(auth);
   };
 
