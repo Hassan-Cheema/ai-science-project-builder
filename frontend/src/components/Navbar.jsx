@@ -43,6 +43,16 @@ const Navbar = () => {
                 Try It Free
               </Link>
               <Link
+                to="/mentor"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                  isActive('/mentor')
+                    ? 'text-notion-blue bg-notion-lightblue'
+                    : 'text-notion-text hover:text-notion-blue hover:bg-notion-lightgray'
+                }`}
+              >
+                <span>🤖</span> AI Mentor
+              </Link>
+              <Link
                 to="/pricing"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive('/pricing')
