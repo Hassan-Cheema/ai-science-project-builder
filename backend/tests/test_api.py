@@ -61,6 +61,44 @@ class TestProjectEndpoints:
             assert "idea" in data
             assert "hypothesis" in data
     
+    def test_generate_idea_with_all_params(self):
+        """Test idea generation with topic, grade, and subject parameters"""
+        response = client.get(
+            "/api/idea",
+            params={
+                "topic": "photosynthesis",
+                "grade": "9-12",
+                "subject": "biology"
+            }
+        )
+        # Should work with or without AI configured
+        assert response.status_code in [200, 503]
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Verify all expected fields are present
+            assert "title" in data
+            assert "idea" in data
+            assert "hypothesis" in data
+            
+            # Verify data types and non-empty strings
+            assert isinstance(data["title"], str)
+            assert isinstance(data["idea"], str)
+            assert isinstance(data["hypothesis"], str)
+            assert len(data["title"]) > 0
+            assert len(data["idea"]) > 10  # Should be substantial
+            assert len(data["hypothesis"]) > 10  # Should be substantial
+            
+            # Verify hypothesis is actually a testable statement
+            hypothesis_lower = data["hypothesis"].lower()
+            assert any(word in hypothesis_lower for word in ["if", "then", "will", "expect", "predict", "increase", "decrease"])
+    
+    def test_generate_idea_invalid_grade(self):
+        """Test idea generation with invalid grade level"""
+        response = client.get("/api/idea?topic=physics&grade=invalid_grade")
+        # Should handle validation error
+        assert response.status_code in [400, 422]
+    
     def test_generate_graph_default(self):
         """Test graph generation with defaults"""
         response = client.get("/api/graph")

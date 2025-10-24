@@ -2,6 +2,17 @@
 
 An AI-powered science project generator with a FastAPI backend and React frontend. Generate creative science projects with hypotheses, data visualizations, and comprehensive PDF reports powered by Google Gemini (FREE) or OpenAI GPT-4o mini and Matplotlib.
 
+[![GitHub stars](https://img.shields.io/github/stars/Hassan-Cheema/ai-science-project-builder?style=social)](https://github.com/Hassan-Cheema/ai-science-project-builder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Live Demo
+
+**🌐 Live Application:** [Add your deployment URL here]  
+**📚 API Documentation:** [Add your API docs URL here]/docs  
+**📊 API Status:** [Add your API health URL here]/health
+
+> **Note:** Replace the URLs above with your actual deployment links once deployed!
+
 ## ✨ Key Features
 
 - 🤖 **AI Project Generation** - Google Gemini (FREE) or OpenAI GPT-4o mini generates unique science project ideas
@@ -45,6 +56,80 @@ ai-science-builder/
 4. **See Data** - View sample data visualizations (bar charts)
 5. **Download PDFs** - Export complete project reports as professional PDFs
 6. **Manage Subscriptions** - Free, Student, and Educator tiers
+
+## 📖 Usage Guide
+
+### Getting Started
+
+1. **Access the Application**
+   - Navigate to the homepage at `http://localhost:5173` (local) or your deployed URL
+   - No login required to try the basic features!
+
+2. **Generate Your First Project**
+   - Go to the "Try It" page
+   - Enter a subject (e.g., "Biology", "Physics", "Chemistry")
+   - Enter a topic (e.g., "photosynthesis", "gravity", "chemical reactions")
+   - Select a grade level (K-5, 6-8, 9-12, or College)
+   - Click "Generate Project"
+
+3. **View Results**
+   - **Title & Idea:** See your AI-generated project idea
+   - **Hypothesis:** Get a testable, scientific hypothesis
+   - **Visualization:** View sample data charts
+   - **Download:** Export as PDF for offline use
+
+4. **Create an Account (Optional)**
+   - Click "Login" in the navigation bar
+   - Sign up with email or Google
+   - Save and manage your projects
+   - Access premium features
+
+### Using the AI Mentor
+
+1. Navigate to the "AI Mentor" page
+2. Ask questions about your science project
+3. Get personalized guidance and suggestions
+4. Receive step-by-step help with methodology
+
+### API Usage
+
+**Generate a project idea:**
+```bash
+curl "http://localhost:8000/api/idea?topic=biology&grade=9-12&subject=science"
+```
+
+**Generate a graph:**
+```bash
+curl "http://localhost:8000/api/graph?title=Plant+Growth&categories=Day1,Day2,Day3&values=5,10,15"
+```
+
+**Check API health:**
+```bash
+curl "http://localhost:8000/health"
+```
+
+**Interactive API Documentation:**
+Visit `http://localhost:8000/docs` for full Swagger UI documentation with try-it-out functionality.
+
+### Managing Projects
+
+**Save a Project (requires authentication):**
+```bash
+curl -X GET "http://localhost:8000/api/idea?topic=physics&save_to_db=true" \
+  -H "Authorization: Bearer YOUR_FIREBASE_TOKEN"
+```
+
+**List Your Projects:**
+```bash
+curl "http://localhost:8000/api/projects" \
+  -H "Authorization: Bearer YOUR_FIREBASE_TOKEN"
+```
+
+**Get a Specific Project:**
+```bash
+curl "http://localhost:8000/api/projects/{project_id}" \
+  -H "Authorization: Bearer YOUR_FIREBASE_TOKEN"
+```
 
 ## 🏗️ Technology Stack
 
@@ -363,6 +448,28 @@ The application includes:
 - Protected dashboard with user information
 - Protected route wrapper component
 
+## 📸 Screenshots
+
+*Add screenshots of your application here once you capture them!*
+
+### Homepage
+![Homepage](./assets/homepage-screenshot.png)
+*Landing page with hero section and feature highlights*
+
+### AI Mentor
+![AI Mentor Interface](./assets/mentor-screenshot.png)
+*Interactive AI mentor for science project guidance*
+
+### Project Generator
+![Project Generator](./assets/project-generator-screenshot.png)
+*Generate science projects with AI*
+
+### Generated Results
+![Results with Visualization](./assets/results-screenshot.png)
+*View generated hypotheses and data visualizations*
+
+> **To add screenshots:** Take screenshots of your app, save them in the `assets/` directory with descriptive names, and they'll appear here automatically!
+
 ## 🔒 Security Best Practices
 
 - Environment variables are never committed to version control
@@ -502,13 +609,158 @@ docker-compose logs frontend
 - **Educators** - Create curricula and lesson plans
 - **Science Enthusiasts** - Explore interesting experiments
 
-## 🤝 Contributing
+## 🤝 Want to Contribute? Here's How!
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Improve documentation
+We love contributions! Whether you're fixing bugs, adding features, or improving documentation, your help makes this project better for everyone. Here's how to get started:
+
+### 🌟 Ways to Contribute
+
+1. **Report Bugs** 🐛
+   - Found a bug? [Open an issue](https://github.com/Hassan-Cheema/ai-science-project-builder/issues/new)
+   - Include: What happened, what you expected, steps to reproduce
+   - Add screenshots if possible!
+
+2. **Suggest Features** 💡
+   - Have an idea? [Create a feature request](https://github.com/Hassan-Cheema/ai-science-project-builder/issues/new)
+   - Describe the feature, its benefits, and potential use cases
+   - Discuss implementation ideas
+
+3. **Improve Documentation** 📚
+   - Fix typos, clarify instructions, add examples
+   - Update README, add tutorials, improve code comments
+   - Documentation is just as important as code!
+
+4. **Submit Code** 💻
+   - Fix bugs, implement features, optimize performance
+   - Follow our coding standards and best practices
+   - Add tests for new features
+
+### 🛠️ Development Setup
+
+1. **Fork the repository**
+   ```bash
+   # Click the "Fork" button on GitHub, then clone your fork
+   git clone https://github.com/YOUR_USERNAME/ai-science-project-builder.git
+   cd ai-science-project-builder
+   ```
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/your-bug-fix
+   ```
+
+3. **Set up your development environment**
+   ```bash
+   # Backend setup
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # or venv\Scripts\activate on Windows
+   pip install -r requirements.txt
+   
+   # Frontend setup
+   cd ../frontend
+   npm install
+   ```
+
+4. **Make your changes**
+   - Write clean, readable code
+   - Follow existing code style and conventions
+   - Add comments for complex logic
+   - Update documentation as needed
+
+5. **Test your changes**
+   ```bash
+   # Backend tests
+   cd backend
+   pytest
+   
+   # Frontend (if you add tests)
+   cd frontend
+   npm test
+   ```
+
+6. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m "feat: add amazing new feature"
+   # Use conventional commits: feat:, fix:, docs:, style:, refactor:, test:, chore:
+   ```
+
+7. **Push and create a Pull Request**
+   ```bash
+   git push origin feature/your-feature-name
+   # Then open a Pull Request on GitHub
+   ```
+
+### 📋 Pull Request Guidelines
+
+- **Title:** Clear and descriptive (e.g., "Add support for chemistry projects")
+- **Description:** Explain what changes you made and why
+- **Testing:** Describe how you tested your changes
+- **Screenshots:** Add before/after screenshots for UI changes
+- **Documentation:** Update README or docs if needed
+- **Small PRs:** Keep changes focused and manageable
+
+### 🎨 Code Style
+
+**Backend (Python):**
+- Follow PEP 8 style guide
+- Use type hints where applicable
+- Write docstrings for functions and classes
+- Keep functions focused and single-purpose
+
+**Frontend (JavaScript/React):**
+- Use functional components with hooks
+- Follow React best practices
+- Use meaningful variable and function names
+- Keep components small and reusable
+
+### ✅ Checklist Before Submitting
+
+- [ ] Code follows the project's style guidelines
+- [ ] Self-review of code completed
+- [ ] Comments added for complex code
+- [ ] Documentation updated (if needed)
+- [ ] Tests added/updated (if applicable)
+- [ ] No new warnings or errors
+- [ ] Tested locally and works as expected
+
+### 🌱 First Time Contributing?
+
+**Welcome!** Here are some good first issues to get started:
+
+- Fix typos in documentation
+- Add more test cases
+- Improve error messages
+- Add input validation
+- Enhance UI components
+- Add more chart types
+- Improve mobile responsiveness
+
+Look for issues labeled `good first issue` or `help wanted` in the GitHub issues!
+
+### 💬 Questions?
+
+- **General questions:** Open a [GitHub Discussion](https://github.com/Hassan-Cheema/ai-science-project-builder/discussions)
+- **Bug reports:** Create an [Issue](https://github.com/Hassan-Cheema/ai-science-project-builder/issues)
+- **Feature ideas:** Start a [Discussion](https://github.com/Hassan-Cheema/ai-science-project-builder/discussions) first!
+
+### 🙌 Recognition
+
+All contributors will be recognized in our [Contributors](https://github.com/Hassan-Cheema/ai-science-project-builder/graphs/contributors) page. Thank you for making this project better!
+
+---
+
+**Not ready to code?** You can still help by:
+- ⭐ Starring the repository
+- 📢 Sharing the project with others
+- 🐛 Reporting bugs you find
+- 💬 Helping answer questions in discussions
+- 📖 Improving documentation
+
+Every contribution matters! 🎉
 
 ## 📄 License
 
