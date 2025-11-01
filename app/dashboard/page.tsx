@@ -7,12 +7,10 @@ import {
     FlaskConical,
     HelpCircle,
     Lightbulb,
-    RefreshCw
+    RefreshCw,
+    ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense, lazy } from 'react';
-
-const ArrowRight = lazy(() => import('lucide-react').then(module => ({ default: module.ArrowRight })));
 
 const tools = [
   { name: 'Essay Helper', IconComponent: FileText, href: '/tools/essay-helper', desc: 'Write essays & create outlines' },
@@ -63,9 +61,7 @@ export default function DashboardPage() {
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
                     <IconComponent className="w-7 h-7 text-white" strokeWidth={2.5} />
                   </div>
-                  <Suspense fallback={<div className="w-5 h-5"></div>}>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
-                  </Suspense>
+                  <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
                   {tool.name}
