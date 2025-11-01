@@ -1,0 +1,79 @@
+🔧 HOW TO FIX "PROJECT NOT GENERATING" ISSUE
+================================================
+
+THE PROBLEM:
+Your .env file has placeholder values instead of real API keys.
+
+THE SOLUTION (2 Minutes):
+==========================
+
+STEP 1: Get FREE Gemini API Key
+---------------------------------
+1. Open browser: https://aistudio.google.com/
+2. Sign in with Google account
+3. Click "Get API Key" (top right)
+4. Click "Create API key"
+5. Copy the key (looks like: AIzaSyD...)
+
+STEP 2: Edit Your .env File
+-----------------------------
+1. Open: backend\.env in notepad
+2. Find this line:
+   GEMINI_API_KEY=your-gemini-api-key
+
+3. Replace with your real key:
+   GEMINI_API_KEY=AIzaSyD_YOUR_ACTUAL_KEY_HERE
+
+4. Save the file
+
+STEP 3: Restart Backend
+------------------------
+1. Go to backend terminal
+2. Press Ctrl+C to stop
+3. Run: python main.py
+4. Wait for "Application startup complete"
+
+STEP 4: Test It
+----------------
+Open new terminal and run:
+curl "http://localhost:8000/api/idea?topic=biology"
+
+You should see a JSON response with a project idea!
+
+THEN: Go to http://localhost:5173/try and generate projects!
+
+==========================
+NEED HELP?
+==========================
+
+If Gemini doesn't work, try OpenAI (paid):
+1. Get key: https://platform.openai.com/api-keys
+2. Add to .env:
+   OPENAI_API_KEY=sk-your-key-here
+3. Restart backend
+
+==========================
+YOUR .env SHOULD LOOK LIKE:
+==========================
+
+# AI Service - ADD YOUR REAL KEY HERE
+GEMINI_API_KEY=AIzaSyD_YOUR_ACTUAL_KEY_HERE
+GEMINI_MODEL=gemini-1.5-flash
+
+# OR use OpenAI
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-4o-mini
+
+# Other settings (optional)
+SUPABASE_URL=
+SUPABASE_KEY=
+FIREBASE_CREDENTIALS_PATH=
+LEMON_SQUEEZY_API_KEY=
+LEMON_SQUEEZY_STORE_ID=
+DEBUG=True
+
+==========================
+
+That's it! Once you add your real API key, projects will generate in 3-5 seconds.
+
+

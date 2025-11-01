@@ -19,14 +19,15 @@
 
 ## ✨ Features
 
-### 🎯 **6 Powerful AI Tools**
+### 🎯 **7 Powerful AI Tools**
 
-1. **📝 Essay Writer** - Generate well-structured essays on any topic
-2. **🔨 Science Project Builder** - Create detailed project plans with streaming output
+1. **📝 Essay Helper** - Generate well-structured essays on any topic
+2. **🔨 Project Builder** - Create detailed project plans with streaming output
 3. **📄 Resume Maker** - Build professional resumes with PDF download
 4. **📚 Notes Summarizer** - Transform long notes into concise summaries
 5. **❓ Quiz Generator** - Create custom quizzes for exam prep
 6. **💡 Idea Generator** - Brainstorm creative ideas for projects and startups
+7. **🔄 Paraphraser & Humanizer** - Rewrite text to sound natural and human-written
 
 ### 🎨 **Premium Design**
 
@@ -110,7 +111,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 2. **Stripe Keys**: https://dashboard.stripe.com/apikeys
 3. **Google Analytics**: https://analytics.google.com
 
-See `STRIPE_SETUP.md` and `BRANDING_SETUP.md` for detailed setup guides.
+See `docs/STRIPE_SETUP.md` and `docs/BRANDING_SETUP.md` for detailed setup guides.
 
 ## 📁 Project Structure
 
@@ -124,14 +125,16 @@ AI-Student-Hub/
 │   │   ├── runNotes/          # Notes summarization
 │   │   ├── runQuiz/           # Quiz generation
 │   │   ├── runIdea/           # Idea generation
+│   │   ├── runParaphraser/    # Paraphraser & humanizer
 │   │   └── stripe/            # Stripe checkout
 │   ├── tools/                 # Tool pages
-│   │   ├── essay-writer/
+│   │   ├── essay-helper/
 │   │   ├── project-builder/
 │   │   ├── resume-maker/
 │   │   ├── notes-summarizer/
 │   │   ├── quiz-generator/
-│   │   └── idea-generator/
+│   │   ├── idea-generator/
+│   │   └── paraphraser/
 │   ├── components/            # Reusable components
 │   │   ├── sidebar-nav.tsx
 │   │   ├── mobile-sidebar.tsx
@@ -181,7 +184,7 @@ npm run lint         # Run ESLint
 
 ## 📱 Features by Tool
 
-### 📝 Essay Writer
+### 📝 Essay Helper
 - Topic input & word count selection
 - Real-time AI generation
 - Copy to clipboard
@@ -218,6 +221,12 @@ npm run lint         # Run ESLint
 - Gradient backgrounds
 - Hover animations
 - Copy all ideas
+
+### 🔄 Paraphraser & Humanizer
+- Two modes: Paraphrase and Humanize
+- Text input with word count
+- AI-powered rewriting
+- Natural, human-like output
 
 ## 🎯 Pages
 
@@ -263,7 +272,7 @@ Works on any platform supporting Next.js:
 
 ## 🎨 Branding Assets
 
-See `BRANDING_SETUP.md` for:
+See `docs/BRANDING_SETUP.md` for:
 - Favicon creation guide
 - Logo specifications
 - Social media image templates
@@ -271,7 +280,7 @@ See `BRANDING_SETUP.md` for:
 
 ## 💳 Monetization
 
-See `STRIPE_SETUP.md` for:
+See `docs/STRIPE_SETUP.md` for:
 - Stripe product creation
 - Price ID configuration
 - Checkout integration
