@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#gradient)"/>
+  
+  <!-- Brain/AI Icon -->
+  <path d="M256 120C193.3 120 142 171.3 142 234C142 268.5 156.8 299.5 180.2 321.3C183.5 324.2 185 328.5 184.2 332.8L179.5 360.5C178.3 367.3 183.7 373.7 190.5 373.7H321.5C328.3 373.7 333.7 367.3 332.5 360.5L327.8 332.8C327 328.5 328.5 324.2 331.8 321.3C355.2 299.5 370 268.5 370 234C370 171.3 318.7 120 256 120Z" fill="white" opacity="0.9"/>
+  
+  <!-- Circuit Lines -->
+  <line x1="220" y1="200" x2="240" y2="220" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="292" y1="200" x2="272" y2="220" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="256" y1="240" x2="256" y2="280" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="220" cy="200" r="8" fill="white"/>
+  <circle cx="292" cy="200" r="8" fill="white"/>
+  <circle cx="256" cy="280" r="8" fill="white"/>
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9333EA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
+
