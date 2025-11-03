@@ -1,17 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable React Compiler only in production (faster dev builds)
-  reactCompiler: process.env.NODE_ENV === 'production',
-
   // Optimize package imports for better tree shaking
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ['@radix-ui/react-icons', 'date-fns', 'recharts'],
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
 
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    // React Compiler is enabled via babel-plugin-react-compiler in package.json
   },
 
   // Image optimization
@@ -63,26 +64,12 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Redirects for SEO
+  // Redirects for SEO - removed essay redirects to allow direct navigation
   async redirects() {
-    return [
-      {
-        source: '/tools/essay-writer',
-        destination: '/tools/essay-helper',
-        permanent: true,
-      },
-      {
-        source: '/tools/essay-outliner',
-        destination: '/tools/essay-helper',
-        permanent: true,
-      },
-    ];
+    return [];
   },
 
-  // Turbopack configuration for Next.js 16+
-  turbopack: {
-    // Turbopack handles optimization automatically
-  },
+  // Note: Turbopack is the default bundler in Next.js 15
 
   // Webpack optimizations for better TBT (only in production)
   webpack: (config, { dev, isServer }) => {
@@ -107,12 +94,6 @@ const nextConfig: NextConfig = {
             name: 'vendors',
             chunks: 'all',
             priority: 10,
-          },
-          lucide: {
-            test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-            name: 'lucide',
-            chunks: 'all',
-            priority: 20,
           },
           common: {
             name: 'common',

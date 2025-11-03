@@ -3,8 +3,6 @@ import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== Notes Summarizer API Route Called ===');
-    
     // Check if API key is configured
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
@@ -14,12 +12,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('API key found, length:', process.env.OPENAI_API_KEY.length);
-
     const body = await request.json();
     const { text } = body;
-    
-    console.log('Received text to summarize, length:', text?.length || 0);
 
     // Validate input
     if (!text || typeof text !== 'string') {
@@ -36,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Summarizing text...');
 
     // Initialize OpenAI client
     const openai = new OpenAI({
@@ -63,30 +56,34 @@ export async function POST(request: NextRequest) {
     const result = completion.choices[0]?.message?.content || 'No summary generated.';
 
     return NextResponse.json({ result });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStatus = (error as { status?: number })?.status;
+    const errorType = (error as { type?: string })?.type;
     console.error('Error summarizing notes:', error);
     console.error('Error details:', {
-      message: error?.message,
-      status: error?.status,
-      type: error?.type,
+      message: errorMessage,
+      status: errorStatus,
+      type: errorType,
     });
-    
+
     // Handle OpenAI API errors
-    if (error?.status === 401) {
+    if (errorStatus === 401) {
       return NextResponse.json(
         { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
         { status: 401 }
       );
     }
-    
-    if (error?.status === 429) {
+
+    if (errorStatus === 429) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
 
-    if (error?.code === 'ENOTFOUND' || error?.code === 'ECONNREFUSED') {
+    const errorCode = (error as { code?: string })?.code;
+    if (errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED') {
       return NextResponse.json(
         { error: 'Network error. Please check your internet connection.' },
         { status: 500 }
@@ -94,14 +91,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Return more detailed error message in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to summarize notes: ${error?.message || 'Unknown error'}`
+    const responseMessage = process.env.NODE_ENV === 'development'
+      ? `Failed to summarize notes: ${errorMessage}`
       : 'Failed to summarize notes. Please try again.';
 
     return NextResponse.json(
-      { error: errorMessage },
+      { error: responseMessage },
       { status: 500 }
     );
   }
 }
-

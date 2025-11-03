@@ -21,7 +21,7 @@ export default function Error({
         <div className="text-6xl mb-6">⚠️</div>
         <h1 className="text-4xl font-black text-gray-900 mb-4">Something Went Wrong</h1>
         <p className="text-xl text-gray-600 mb-8">
-          We encountered an unexpected error. Don't worry, we're working on it.
+          We encountered an unexpected error. Don&apos;t worry, we&apos;re working on it.
         </p>
         {process.env.NODE_ENV === 'development' && (
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-8 text-left">

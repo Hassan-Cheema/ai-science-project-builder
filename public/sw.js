@@ -1,5 +1,5 @@
 // Service Worker for Auto Inventor - Optimized for LCP and TBT
-const CACHE_NAME = 'auto-inventor-v1';
+// const CACHE_NAME = 'auto-inventor-v1'; // Unused, keeping for future use
 const STATIC_CACHE = 'static-v1';
 const DYNAMIC_CACHE = 'dynamic-v1';
 
@@ -141,5 +141,5 @@ self.addEventListener('sync', (event) => {
 
 async function doBackgroundSync() {
   // Handle any pending requests when back online
-  console.log('Background sync triggered');
+  // Background sync triggered
 }

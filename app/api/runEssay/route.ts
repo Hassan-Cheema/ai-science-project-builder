@@ -1,47 +1,59 @@
+// Enhanced Essay Generator API with advanced features
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { z } from 'zod';
+import { createAdvancedCompletion, DEFAULT_MODELS } from '@/lib/openai-enhanced';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { env } from '@/lib/env';
+
+// Runtime configuration
+export const runtime = 'edge'; // Use Edge runtime for better performance
+export const maxDuration = 60; // Max duration in seconds
+
+// Input validation schema
+const essayRequestSchema = z.object({
+  topic: z.string().min(1, 'Topic is required').max(500, 'Topic too long'),
+  words: z.string().regex(/^\d+$/, 'Word count must be a number'),
+  essayType: z.enum(['classic', 'persuasive', 'personal', 'book-report', 'critique', 'compare']).default('classic'),
+  writingStyle: z.enum(['standard', 'clone', 'custom']).default('standard'),
+  customStyle: z.string().optional(),
+  model: z.enum(['gpt-4o', 'gpt-4o-mini', 'o1-preview']).optional(),
+  userId: z.string().optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== API Route Called ===');
-    
-    // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    // Get client IP for rate limiting
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous';
+    const identifier = `essay:${clientIp}`;
+
+    // Check rate limit
+    const rateLimitResult = await checkRateLimit(identifier, 'free');
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.' },
-        { status: 500 }
+        {
+          error: 'Rate limit exceeded',
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          reset: rateLimitResult.reset,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          },
+        }
       );
     }
 
-    console.log('API key found, length:', process.env.OPENAI_API_KEY.length);
-
+    // Parse and validate request body
     const body = await request.json();
-    const { topic, words, essayType = 'classic', writingStyle = 'standard', customStyle } = body;
-    
-    console.log('Received topic:', topic, 'words:', words, 'type:', essayType, 'style:', writingStyle);
+    const validatedData = essayRequestSchema.parse(body);
+    const { topic, words, essayType, writingStyle, customStyle, model, userId } = validatedData;
 
-    // Validate input
-    if (!topic || typeof topic !== 'string') {
-      return NextResponse.json(
-        { error: 'Topic is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (!words || typeof words !== 'string') {
-      return NextResponse.json(
-        { error: 'Word count is required' },
-        { status: 400 }
-      );
-    }
-
-    console.log(`Generating essay for topic: "${topic}" with ${words} words`);
-
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // Select model (default to GPT-4o for better quality)
+    const selectedModel = model || DEFAULT_MODELS.quality;
 
     // Build enhanced prompt based on essay type and style
     const essayTypeInstructions: Record<string, string> = {
@@ -60,76 +72,120 @@ export async function POST(request: NextRequest) {
       : 'Use a college-level academic tone with clear, professional language.';
 
     const essayInstruction = essayTypeInstructions[essayType] || essayTypeInstructions.classic;
+    const wordCount = parseInt(words);
+    const maxTokens = Math.min(wordCount * 2, 8000); // Cap at 8000 tokens
 
-    // Call OpenAI GPT-4o-mini
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
+    // Create enhanced completion
+    const completion = await createAdvancedCompletion(
+      [
         {
           role: 'system',
-          content: `You are an expert academic essay writer. You create well-structured, insightful essays that meet academic standards. ${styleInstructions}`,
+          content: `You are an expert academic essay writer with a PhD in English Literature. You create well-structured, insightful essays that meet academic standards. ${styleInstructions}
+
+Your essays should:
+- Have compelling introductions with clear thesis statements
+- Include well-researched evidence and analysis
+- Demonstrate critical thinking and original insights
+- Use proper academic formatting and citations where appropriate
+- Conclude with strong summaries that reinforce main points`,
         },
         {
           role: 'user',
           content: `${essayInstruction}
 
 Topic: "${topic}"
-Target Length: Approximately ${words} words
+Target Length: Approximately ${wordCount} words
 
 Create a complete essay with:
 1. Engaging introduction with clear thesis
-2. Well-developed body paragraphs with evidence and analysis  
+2. Well-developed body paragraphs with evidence and analysis
 3. Strong conclusion that reinforces main points
 
-Make it well-researched, properly structured, and compelling.`,
+Make it well-researched, properly structured, and compelling. Ensure it meets academic standards and demonstrates critical thinking.`,
         },
       ],
-      temperature: 0.7,
-      max_tokens: parseInt(words) * 2,
-    });
+      {
+        model: selectedModel,
+        temperature: 0.7,
+        maxTokens,
+        topP: 0.9,
+        frequencyPenalty: 0.3,
+        presencePenalty: 0.3,
+        cache: true,
+        cacheTTL: 7200, // Cache for 2 hours
+      }
+    );
 
     const result = completion.choices[0]?.message?.content || 'No essay generated.';
 
-    return NextResponse.json({ result });
-  } catch (error: any) {
+    // Log usage (if Supabase is configured)
+    if (userId && env.supabaseUrl) {
+      // Async logging (don't await)
+      fetch(`${env.baseUrl}/api/log-usage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          tool: 'essay-helper',
+          input: { topic, essayType, words },
+          model: selectedModel,
+        }),
+      }).catch(() => {
+        // Silently fail logging
+      });
+    }
+
+    return NextResponse.json(
+      {
+        result,
+        model: selectedModel,
+        tokens: completion.usage?.total_tokens,
+        remaining: rateLimitResult.remaining - 1,
+      },
+      {
+        headers: {
+          'X-RateLimit-Remaining': (rateLimitResult.remaining - 1).toString(),
+          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+        },
+      }
+    );
+  } catch (error: unknown) {
     console.error('Error generating essay:', error);
-    console.error('Error details:', {
-      message: error?.message,
-      status: error?.status,
-      type: error?.type,
-    });
-    
+
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const errorStatus = (error as { status?: number })?.status;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     // Handle OpenAI API errors
-    if (error?.status === 401) {
+    if (errorStatus === 401) {
       return NextResponse.json(
         { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
         { status: 401 }
       );
     }
-    
-    if (error?.status === 429) {
+
+    if (errorStatus === 429) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded. Please try again later.' },
+        { error: 'OpenAI rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
 
-    if (error?.code === 'ENOTFOUND' || error?.code === 'ECONNREFUSED') {
-      return NextResponse.json(
-        { error: 'Network error. Please check your internet connection.' },
-        { status: 500 }
-      );
-    }
-
-    // Return more detailed error message in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to generate essay: ${error?.message || 'Unknown error'}`
+    // Return error message
+    const responseMessage = env.nodeEnv === 'development'
+      ? `Failed to generate essay: ${errorMessage}`
       : 'Failed to generate essay. Please try again.';
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: responseMessage }, { status: 500 });
   }
 }
-

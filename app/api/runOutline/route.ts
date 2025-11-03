@@ -3,8 +3,6 @@ import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== Essay Outline API Route Called ===');
-    
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
       return NextResponse.json(
@@ -15,8 +13,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { topic, essayType = 'classic' } = body;
-    
-    console.log('Received topic:', topic, 'type:', essayType);
 
     if (!topic || typeof topic !== 'string') {
       return NextResponse.json(
@@ -68,29 +64,31 @@ Make it comprehensive and easy to follow.`,
     const result = completion.choices[0]?.message?.content || 'No outline generated.';
 
     return NextResponse.json({ result });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStatus = (error as { status?: number })?.status;
     console.error('Error generating outline:', error);
     
-    if (error?.status === 401) {
+    if (errorStatus === 401) {
       return NextResponse.json(
         { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
         { status: 401 }
       );
     }
     
-    if (error?.status === 429) {
+    if (errorStatus === 429) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
 
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to generate outline: ${error?.message || 'Unknown error'}`
+    const responseMessage = process.env.NODE_ENV === 'development' 
+      ? `Failed to generate outline: ${errorMessage}`
       : 'Failed to generate outline. Please try again.';
 
     return NextResponse.json(
-      { error: errorMessage },
+      { error: responseMessage },
       { status: 500 }
     );
   }

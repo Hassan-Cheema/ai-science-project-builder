@@ -24,7 +24,7 @@ export default function SuccessPage() {
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              <strong>What's next?</strong> You now have access to all premium features. Start creating unlimited essays and science projects!
+              <strong>What&apos;s next?</strong> You now have access to all premium features. Start creating unlimited essays and science projects!
             </p>
           </div>
           

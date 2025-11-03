@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { Loader2, Copy, Check, Lightbulb } from 'lucide-react';
+import { Loader2, Copy, Check } from 'lucide-react';
 
 type FormData = {
   topic: string;
@@ -55,7 +55,7 @@ export default function IdeaGeneratorPage() {
 
       setIdeas(result.ideas);
       setIsLoading(false);
-    } catch (error) {
+    } catch {
       alert(`Error: Network error. Please try again.`);
       setIsLoading(false);
     }

@@ -7,6 +7,8 @@ import { Loader2, Copy, Check } from 'lucide-react';
 type FormData = {
   topic: string;
   grade: string;
+  budget: string;
+  goal: string;
 };
 
 export default function ProjectBuilderPage() {
@@ -33,7 +35,12 @@ export default function ProjectBuilderPage() {
       const response = await fetch('/api/runProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: data.topic, grade: data.grade }),
+        body: JSON.stringify({ 
+          topic: data.topic, 
+          grade: data.grade,
+          budget: data.budget,
+          goal: data.goal,
+        }),
       });
 
       if (!response.ok) {
@@ -42,7 +49,7 @@ export default function ProjectBuilderPage() {
         try {
           const errorJson = JSON.parse(errorText);
           errorMessage = errorJson.error || errorMessage;
-        } catch (e) {
+        } catch {
           errorMessage = errorText || errorMessage;
         }
         setOutput(`Error: ${errorMessage}`);
@@ -69,7 +76,7 @@ export default function ProjectBuilderPage() {
       }
 
       setIsLoading(false);
-    } catch (error) {
+    } catch {
       setOutput(`Error: Network error. Please try again.`);
       setIsLoading(false);
     }
@@ -105,6 +112,34 @@ export default function ProjectBuilderPage() {
             ))}
           </select>
           {errors.grade && <p className="mt-2 text-sm text-red-600">{errors.grade.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900 mb-2">Budget</label>
+          <select
+            {...register('budget', { required: 'Budget is required' })}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
+          >
+            <option value="">Select budget</option>
+            <option value="Low">Low - Basic materials, household items</option>
+            <option value="Medium">Medium - Standard lab supplies</option>
+            <option value="High">High - Professional equipment and materials</option>
+          </select>
+          {errors.budget && <p className="mt-2 text-sm text-red-600">{errors.budget.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900 mb-2">Goal</label>
+          <select
+            {...register('goal', { required: 'Goal is required' })}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
+          >
+            <option value="">Select goal</option>
+            <option value="Demo">Demo - Classroom demonstration or presentation</option>
+            <option value="Competition">Competition - Science fair or competition entry</option>
+            <option value="Research">Research - Academic research or investigation</option>
+          </select>
+          {errors.goal && <p className="mt-2 text-sm text-red-600">{errors.goal.message}</p>}
         </div>
 
         <button
@@ -147,13 +182,60 @@ export default function ProjectBuilderPage() {
             )}
           </div>
           
-          <div className="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
+          <div className="bg-gray-50 rounded-xl p-6 max-h-[600px] overflow-y-auto">
             {isLoading && !output ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
               </div>
             ) : (
-              <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{output}</p>
+              <div className="prose prose-sm max-w-none text-gray-900">
+                <div className="whitespace-pre-wrap font-sans">
+                  {output.split('\n').map((line, index) => {
+                    // Format headings
+                    if (line.startsWith('## ')) {
+                      return (
+                        <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-gray-900 first:mt-0">
+                          {line.replace('## ', '')}
+                        </h2>
+                      );
+                    }
+                    if (line.startsWith('### ')) {
+                      return (
+                        <h3 key={index} className="text-lg font-semibold mt-4 mb-2 text-gray-900">
+                          {line.replace('### ', '')}
+                        </h3>
+                      );
+                    }
+                    // Format bullet points
+                    if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
+                      return (
+                        <div key={index} className="ml-4 my-1 flex">
+                          <span className="mr-2">•</span>
+                          <span>{line.replace(/^[-•]\s*/, '')}</span>
+                        </div>
+                      );
+                    }
+                    // Format numbered lists
+                    if (/^\d+\.\s/.test(line.trim())) {
+                      return (
+                        <div key={index} className="ml-4 my-1">
+                          {line.trim()}
+                        </div>
+                      );
+                    }
+                    // Regular paragraphs
+                    if (line.trim()) {
+                      return (
+                        <p key={index} className="my-2 leading-relaxed">
+                          {line}
+                        </p>
+                      );
+                    }
+                    // Empty lines for spacing
+                    return <br key={index} />;
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </div>

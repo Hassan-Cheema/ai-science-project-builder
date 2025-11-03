@@ -3,8 +3,6 @@ import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== Idea Generator API Route Called ===');
-    
     // Check if API key is configured
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
@@ -14,12 +12,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('API key found, length:', process.env.OPENAI_API_KEY.length);
-
     const body = await request.json();
     const { topic, type } = body;
-    
-    console.log('Received topic:', topic, 'type:', type);
 
     // Validate input
     if (!topic || typeof topic !== 'string') {
@@ -36,7 +30,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Generating ${type} ideas about ${topic}`);
 
     // Initialize OpenAI client
     const openai = new OpenAI({
@@ -97,30 +90,34 @@ Make sure each idea is creative, unique, and relevant to ${topic}. The ideas sho
     }
 
     return NextResponse.json({ ideas: parsedResult.ideas });
-  } catch (error: any) {
-    console.error('Error generating ideas:', error);
-    console.error('Error details:', {
-      message: error?.message,
-      status: error?.status,
-      type: error?.type,
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStatus = (error as { status?: number })?.status;
+    const errorType = (error as { type?: string })?.type;
+    
+    console.error('Error generating ideas:', {
+      message: errorMessage,
+      status: errorStatus,
+      type: errorType,
     });
     
     // Handle OpenAI API errors
-    if (error?.status === 401) {
+    if (errorStatus === 401) {
       return NextResponse.json(
         { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
         { status: 401 }
       );
     }
     
-    if (error?.status === 429) {
+    if (errorStatus === 429) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
 
-    if (error?.code === 'ENOTFOUND' || error?.code === 'ECONNREFUSED') {
+    const errorCode = (error as { code?: string })?.code;
+    if (errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED') {
       return NextResponse.json(
         { error: 'Network error. Please check your internet connection.' },
         { status: 500 }
@@ -128,12 +125,12 @@ Make sure each idea is creative, unique, and relevant to ${topic}. The ideas sho
     }
 
     // Return more detailed error message in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to generate ideas: ${error?.message || 'Unknown error'}`
+    const responseMessage = process.env.NODE_ENV === 'development' 
+      ? `Failed to generate ideas: ${errorMessage}`
       : 'Failed to generate ideas. Please try again.';
 
     return NextResponse.json(
-      { error: errorMessage },
+      { error: responseMessage },
       { status: 500 }
     );
   }

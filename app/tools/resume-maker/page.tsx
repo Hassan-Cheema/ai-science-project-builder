@@ -1,9 +1,9 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { Loader2, Download } from 'lucide-react';
 import { ResumeTemplate } from '@/app/components/resume-template';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 type FormData = {
   name: string;
@@ -43,7 +43,7 @@ export default function ResumeMakerPage() {
         try {
           const errorJson = JSON.parse(errorText);
           errorMessage = errorJson.error || errorMessage;
-        } catch (e) {
+        } catch {
           errorMessage = errorText || errorMessage;
         }
         setOutput(`Error: ${errorMessage}`);
@@ -70,7 +70,7 @@ export default function ResumeMakerPage() {
       }
 
       setIsLoading(false);
-    } catch (error) {
+    } catch {
       setOutput(`Error: Network error. Please try again.`);
       setIsLoading(false);
     }
@@ -164,10 +164,10 @@ export default function ResumeMakerPage() {
 
       {output && resumeData && !isLoading && (
         <div>
-          <ResumeTemplate 
-            content={output} 
-            name={resumeData.name} 
-            role={resumeData.role} 
+          <ResumeTemplate
+            content={output}
+            name={resumeData.name}
+            role={resumeData.role}
           />
         </div>
       )}

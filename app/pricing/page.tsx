@@ -2,10 +2,12 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { loadStripe } from '@stripe/stripe-js';
+// Stripe will be initialized when needed
+// import { loadStripe } from '@stripe/stripe-js';
 import { useState } from 'react';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Stripe initialization (if needed for client-side)
+// const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 const plans = [
   {
@@ -188,14 +190,14 @@ export default function PricingPage() {
           <div>
             <h3 className="text-lg font-semibold mb-2">Can I cancel anytime?</h3>
             <p className="text-gray-600">
-              Yes! You can cancel your subscription at any time. You'll retain access until the end of your billing period.
+              Yes! You can cancel your subscription at any time. You&apos;ll retain access until the end of your billing period.
             </p>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-2">Do you offer refunds?</h3>
             <p className="text-gray-600">
-              We offer a 7-day money-back guarantee. If you're not satisfied, contact us for a full refund.
+              We offer a 7-day money-back guarantee. If you&apos;re not satisfied, contact us for a full refund.
             </p>
           </div>
 

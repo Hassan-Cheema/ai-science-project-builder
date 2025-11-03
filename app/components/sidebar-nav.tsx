@@ -5,7 +5,6 @@ import {
     Briefcase,
     FileText,
     FlaskConical,
-    Gem,
     HelpCircle,
     Info,
     LayoutDashboard,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', Icon: LayoutDashboard },
@@ -26,21 +24,15 @@ const navItems = [
   { name: 'Idea Generator', href: '/tools/idea-generator', Icon: Lightbulb },
   { name: 'Paraphraser', href: '/tools/paraphraser', Icon: RefreshCw },
   { name: 'About', href: '/about', Icon: Info },
-  { name: 'Pricing', href: '/pricing', Icon: Gem },
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <nav className="space-y-2">
       {navItems.map((item) => {
-        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
         const IconComponent = item.Icon;
         return (
           <Link key={item.href} href={item.href}>
@@ -51,11 +43,12 @@ export function SidebarNav() {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              {mounted ? (
-                <IconComponent className={`w-4 h-4 group-hover:scale-110 transition-transform flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500'}`} strokeWidth={2} />
-              ) : (
-                <div className="w-4 h-4 flex-shrink-0" />
-              )}
+              <IconComponent
+                className={`w-4 h-4 group-hover:scale-110 transition-transform flex-shrink-0 ${
+                  isActive ? 'text-white' : 'text-gray-500'
+                }`}
+                strokeWidth={2}
+              />
               <span>{item.name}</span>
             </div>
           </Link>

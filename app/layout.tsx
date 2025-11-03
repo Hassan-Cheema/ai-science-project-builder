@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Analytics } from "./components/analytics";
+import { DarkModeToggle } from "./components/dark-mode-toggle";
 import { Footer } from "./components/footer";
 import { LayoutWrapper } from "./components/layout-wrapper";
 import { MobileSidebar } from "./components/mobile-sidebar";
 import { SidebarWrapper } from "./components/sidebar-wrapper";
+import { ToastProvider } from "./components/toast-provider";
 import "./globals.css";
 
 // Optimize font loading for better LCP
@@ -86,11 +88,8 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Critical resource hints for LCP optimization */}
-        <link rel="preload" href="/fonts/geist-sans.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 
         {/* Critical CSS inline for faster rendering - optimized for LCP */}
         <style dangerouslySetInnerHTML={{
@@ -108,9 +107,9 @@ export default function RootLayout({
             .font-mono { font-family: ${geistMono.style.fontFamily}, monospace; }
 
             /* Critical layout styles */
-            .navbar { position: fixed; top: 0; left: 0; right: 0; height: 4rem; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px) saturate(180%); border-bottom: 1px solid rgba(0,0,0,0.06); z-index: 50; }
+            .navbar { position: fixed; top: 0; left: 0; right: 0; height: 4rem; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0,0,0,0.06); z-index: 50; }
             .main-content { padding-top: 4rem !important; min-height: 100vh; background: white; }
-            .sidebar { position: fixed; left: 0; top: 4rem; bottom: 0; width: 16rem; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-right: 1px solid rgba(0,0,0,0.06); padding: 1.5rem; overflow-y: auto; z-index: 40; }
+            .sidebar { position: fixed; left: 0; top: 4rem; bottom: 0; width: 16rem; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); border-right: 1px solid rgba(0,0,0,0.06); padding: 1.5rem; overflow-y: auto; z-index: 40; }
             .content-area { margin-left: 16rem !important; padding: 4rem 1.5rem 2rem !important; }
             .full-width-content { margin-left: 0 !important; padding: 4rem 0 0 0 !important; }
 
@@ -128,26 +127,21 @@ export default function RootLayout({
         }} />
 
         {/* Service Worker Registration - Deferred for better TBT */}
-        <script dangerouslySetInnerHTML={{
+        <script defer dangerouslySetInnerHTML={{
           __html: `
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                  .then(function(registration) {
-                    console.log('SW registered: ', registration);
-                  })
-                  .catch(function(registrationError) {
-                    console.log('SW registration failed: ', registrationError);
-                  });
-              });
+            if ('serviceWorker' in navigator && 'requestIdleCallback' in window) {
+              requestIdleCallback(function() {
+                navigator.serviceWorker.register('/sw.js').catch(function() {});
+              }, { timeout: 2000 });
             }
           `
         }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors`}
       >
         <Analytics />
+        <ToastProvider />
 
         {/* Optimized navbar with critical styles */}
         <header className="navbar">
@@ -162,13 +156,9 @@ export default function RootLayout({
 
             {/* Right side - Navigation */}
             <div className="flex items-center gap-4">
-              <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
-                Pricing
-              </Link>
-              <Link href="/dashboard">
-                <button className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
-                  Dashboard
-                </button>
+              <DarkModeToggle />
+              <Link href="/dashboard" className="bg-gray-900 dark:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors inline-block">
+                Dashboard
               </Link>
             </div>
           </div>

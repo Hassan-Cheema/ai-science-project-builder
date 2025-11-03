@@ -67,7 +67,7 @@ export default function EssayWriterPage() {
 
       setOutput(result.result);
       setIsLoading(false);
-    } catch (error) {
+    } catch {
       setOutput(`Error: Network error. Please try again.`);
       setIsLoading(false);
     }

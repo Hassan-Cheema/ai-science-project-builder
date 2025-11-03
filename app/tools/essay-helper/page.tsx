@@ -1,7 +1,7 @@
 'use client';
 
+import { ArrowRight, FileText, List, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { FileText, List, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function EssayHelperPage() {
   return (
@@ -18,15 +18,19 @@ export default function EssayHelperPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Essay Writer Card */}
-          <Link href="/tools/essay-writer">
-            <div className="group bg-white border-2 border-gray-200 hover:border-gray-900 rounded-3xl p-12 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer">
+          <Link 
+            href="/tools/essay-writer" 
+            className="block cursor-pointer no-underline" 
+            prefetch={true}
+          >
+            <div className="group bg-white border-2 border-gray-200 hover:border-gray-900 rounded-3xl p-12 transition-all duration-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   <FileText className="w-8 h-8 text-white" />
                 </div>
                 <ArrowRight className="w-8 h-8 text-gray-400 group-hover:text-gray-900 group-hover:translate-x-2 transition-all" />
               </div>
-              
+
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Essay Writer
               </h2>
@@ -61,15 +65,19 @@ export default function EssayHelperPage() {
           </Link>
 
           {/* Essay Outliner Card */}
-          <Link href="/tools/essay-outliner">
-            <div className="group bg-white border-2 border-gray-200 hover:border-gray-900 rounded-3xl p-12 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer">
+          <Link 
+            href="/tools/essay-outliner" 
+            className="block cursor-pointer no-underline" 
+            prefetch={true}
+          >
+            <div className="group bg-white border-2 border-gray-200 hover:border-gray-900 rounded-3xl p-12 transition-all duration-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   <List className="w-8 h-8 text-white" />
                 </div>
                 <ArrowRight className="w-8 h-8 text-gray-400 group-hover:text-gray-900 group-hover:translate-x-2 transition-all" />
               </div>
-              
+
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Essay Outliner
               </h2>
@@ -114,4 +122,3 @@ export default function EssayHelperPage() {
     </div>
   );
 }
-

@@ -15,7 +15,7 @@ export default function AboutPage() {
           About Auto Inventor
         </h1>
         <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed">
-          We're democratizing access to AI-powered academic tools for students worldwide.
+          We&apos;re democratizing access to AI-powered academic tools for students worldwide.
         </p>
       </div>
 
@@ -32,7 +32,7 @@ export default function AboutPage() {
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
         <div className="prose prose-lg max-w-none">
           <p className="text-gray-700 leading-relaxed mb-4">
-            Auto Inventor started as a simple idea: what if students had access to the same powerful AI tools that professionals use? We saw countless students struggling with time management, writing assignments, and preparing for their futures. That's when we knew we had to build something different.
+            Auto Inventor started as a simple idea: what if students had access to the same powerful AI tools that professionals use? We saw countless students struggling with time management, writing assignments, and preparing for their futures. That&apos;s when we knew we had to build something different.
           </p>
           <p className="text-gray-700 leading-relaxed mb-4">
             Today, Auto Inventor provides 6 powerful AI tools completely free, helping thousands of students write essays, generate project ideas, create professional resumes, summarize lengthy notes, and prepare for exams with custom quizzes.
@@ -110,11 +110,6 @@ export default function AboutPage() {
           <Link href="/dashboard">
             <button className="bg-white text-indigo-600 hover:bg-gray-100 font-bold px-8 py-4 rounded-full text-lg transition-colors shadow-lg">
               Explore Tools
-            </button>
-          </Link>
-          <Link href="/pricing">
-            <button className="border-2 border-white text-white hover:bg-white/10 font-bold px-8 py-4 rounded-full text-lg transition-colors">
-              View Pricing
             </button>
           </Link>
         </div>

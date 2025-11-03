@@ -1,4 +1,56 @@
 // Environment variable validation and configuration
+import { z } from 'zod';
+
+// Environment schema for validation
+const envSchema = z.object({
+  // OpenAI Configuration
+  OPENAI_API_KEY: z.string().min(1, 'OpenAI API key is required'),
+
+  // Stripe Configuration
+  STRIPE_SECRET_KEY: z.string().optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+
+  // Supabase Configuration (for database and vector storage)
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+
+  // Upstash Redis Configuration (for caching and rate limiting)
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+  // Application Configuration
+  NEXT_PUBLIC_BASE_URL: z.string().url().default('http://localhost:3000'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+
+  // Analytics & Monitoring
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+  SENTRY_DSN: z.string().url().optional(),
+
+  // Feature Flags
+  ENABLE_VECTOR_SEARCH: z.string().transform(val => val === 'true').default('false'),
+  ENABLE_IMAGE_GENERATION: z.string().transform(val => val === 'true').default('false'),
+  ENABLE_CODE_GENERATION: z.string().transform(val => val === 'true').default('true'),
+});
+
+// Parse and validate environment variables
+function getEnv() {
+  try {
+    return envSchema.parse(process.env);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('❌ Environment variable validation failed:');
+      error.errors.forEach(err => {
+        console.error(`  - ${err.path.join('.')}: ${err.message}`);
+      });
+
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Missing required environment variables');
+      }
+    }
+    throw error;
+  }
+}
 
 export const env = {
   // OpenAI Configuration
@@ -8,12 +60,27 @@ export const env = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
 
+  // Supabase Configuration
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+
+  // Upstash Redis Configuration
+  upstashRedisUrl: process.env.UPSTASH_REDIS_REST_URL || '',
+  upstashRedisToken: process.env.UPSTASH_REDIS_REST_TOKEN || '',
+
   // Application Configuration
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
   nodeEnv: process.env.NODE_ENV || 'development',
 
-  // Analytics
-  gaId: process.env.NEXT_PUBLIC_GA_ID || '',
+  // Analytics & Monitoring
+  gaId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '',
+  sentryDsn: process.env.SENTRY_DSN || '',
+
+  // Feature Flags
+  enableVectorSearch: process.env.ENABLE_VECTOR_SEARCH === 'true',
+  enableImageGeneration: process.env.ENABLE_IMAGE_GENERATION === 'true',
+  enableCodeGeneration: process.env.ENABLE_CODE_GENERATION !== 'false',
 };
 
 // Validate required environment variables
@@ -25,7 +92,7 @@ export function validateEnv() {
   }
 
   if (errors.length > 0 && env.nodeEnv === 'production') {
-    console.error('Environment validation failed:');
+    console.error('❌ Environment validation failed:');
     errors.forEach(error => console.error(`  - ${error}`));
     throw new Error('Missing required environment variables');
   }
@@ -37,5 +104,16 @@ export function validateEnv() {
 export const features = {
   stripe: Boolean(env.stripeSecretKey && env.stripePublishableKey),
   analytics: Boolean(env.gaId),
+  supabase: Boolean(env.supabaseUrl && env.supabaseAnonKey),
+  redis: Boolean(env.upstashRedisUrl && env.upstashRedisToken),
+  vectorSearch: env.enableVectorSearch,
+  imageGeneration: env.enableImageGeneration,
+  codeGeneration: env.enableCodeGeneration,
+  monitoring: Boolean(env.sentryDsn),
 };
 
+// Export validated env (for use in runtime)
+// Lazy initialization to avoid module-level errors
+export function getValidatedEnv() {
+  return getEnv();
+}

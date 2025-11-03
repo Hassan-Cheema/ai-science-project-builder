@@ -3,8 +3,6 @@ import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== Resume API Route Called ===');
-    
     // Check if API key is configured
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
@@ -14,12 +12,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('API key found, length:', process.env.OPENAI_API_KEY.length);
-
     const body = await request.json();
     const { name, role, skills, experience, careerGoal } = body;
-    
-    console.log('Received resume request for:', name, 'role:', role);
 
     // Validate input
     if (!name || typeof name !== 'string') {
@@ -50,7 +44,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Generating resume for ${name} applying for ${role}`);
 
     // Initialize OpenAI client
     const openai = new OpenAI({
@@ -77,7 +70,7 @@ CORE COMPETENCIES
 List key skills organized by category (Technical Skills, Soft Skills, Tools, etc.)
 Use bullet points with • symbol
 
-PROFESSIONAL EXPERIENCE  
+PROFESSIONAL EXPERIENCE
 Format each position as:
 [Job Title] | [Company Name] | [Dates]
 • Achievement/responsibility with action verbs
@@ -141,30 +134,34 @@ Format instructions:
         'Connection': 'keep-alive',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStatus = (error as { status?: number })?.status;
+    const errorType = (error as { type?: string })?.type;
     console.error('Error generating resume:', error);
     console.error('Error details:', {
-      message: error?.message,
-      status: error?.status,
-      type: error?.type,
+      message: errorMessage,
+      status: errorStatus,
+      type: errorType,
     });
-    
+
     // Handle OpenAI API errors
-    if (error?.status === 401) {
+    if (errorStatus === 401) {
       return NextResponse.json(
         { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
         { status: 401 }
       );
     }
-    
-    if (error?.status === 429) {
+
+    if (errorStatus === 429) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
 
-    if (error?.code === 'ENOTFOUND' || error?.code === 'ECONNREFUSED') {
+    const errorCode = (error as { code?: string })?.code;
+    if (errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED') {
       return NextResponse.json(
         { error: 'Network error. Please check your internet connection.' },
         { status: 500 }
@@ -172,14 +169,13 @@ Format instructions:
     }
 
     // Return more detailed error message in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to generate resume: ${error?.message || 'Unknown error'}`
+    const responseMessage = process.env.NODE_ENV === 'development'
+      ? `Failed to generate resume: ${errorMessage}`
       : 'Failed to generate resume. Please try again.';
 
     return NextResponse.json(
-      { error: errorMessage },
+      { error: responseMessage },
       { status: 500 }
     );
   }
 }
-
