@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // ESLint configuration - plugin is detected via FlatCompat in eslint.config.mjs
+  eslint: {
+    // This warning is informational and doesn't affect functionality
+    // The Next.js plugin is properly included via compat.extends()
+    ignoreDuringBuilds: false,
+  },
+  
   // Optimize package imports for better tree shaking
   experimental: {
     optimizePackageImports: ['@radix-ui/react-icons', 'date-fns', 'recharts'],

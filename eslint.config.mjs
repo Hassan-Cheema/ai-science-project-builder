@@ -9,6 +9,8 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+// ESLint configuration with Next.js plugin
+// Using compat.extends includes the Next.js plugin automatically
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
