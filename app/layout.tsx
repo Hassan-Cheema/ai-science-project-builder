@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "./components/analytics";
 import { DarkModeToggle } from "./components/dark-mode-toggle";
 import { Footer } from "./components/footer";
 import { LayoutWrapper } from "./components/layout-wrapper";
 import { MobileSidebar } from "./components/mobile-sidebar";
 import { SidebarWrapper } from "./components/sidebar-wrapper";
+import { SpeedInsightsWrapper } from "./components/speed-insights";
 import { ToastProvider } from "./components/toast-provider";
 import "./globals.css";
 
@@ -142,7 +142,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors`}
       >
         <Analytics />
-        <SpeedInsights />
+        <SpeedInsightsWrapper />
         <ToastProvider />
 
         {/* Optimized navbar with critical styles */}
