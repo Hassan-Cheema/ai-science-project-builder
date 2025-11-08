@@ -36,10 +36,9 @@ function getGeminiClient(): GoogleGenAI {
 
 // Available Gemini models
 export const GEMINI_MODELS = {
-  GEMINI_1_5_PRO: 'gemini-1.5-pro-latest',
-  GEMINI_1_5_FLASH: 'gemini-1.5-flash-latest',
-  GEMINI_1_5_FLASH_8B: 'gemini-1.5-flash-8b-latest',
-  GEMINI_1_5_FLASH_AUDIO: 'gemini-1.5-flash-audio-latest',
+  GEMINI_1_5_PRO: 'gemini-2.5-pro',
+  GEMINI_1_5_FLASH: 'gemini-2.5-flash',
+
 } as const;
 
 // Default models for different use cases

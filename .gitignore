@@ -12,7 +12,7 @@
 google-cloud-key.json
 # testing
 /coverage
-
+sch
 # next.js
 /.next/
 /out/

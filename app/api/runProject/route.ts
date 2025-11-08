@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Use Gemini Flash (latest) for API-key friendly streaming responses
-    const useModel = 'gemini-1.5-flash-latest';
+    const useModel = 'gemini-2.5-flash';
 
     // Call Gemini with enhanced prompt for world-class results
     const stream = createStreamingCompletion([
