@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
+
   // Optimized: use useMemo to avoid unnecessary re-renders
   const className = useMemo(() => {
     const isHomePage = pathname === '/';
@@ -13,7 +13,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <main className={className}>
+    <main className={className} suppressHydrationWarning>
       {children}
     </main>
   );

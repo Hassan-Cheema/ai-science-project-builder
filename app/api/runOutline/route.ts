@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { createAdvancedCompletion } from '@/lib/gemini-enhanced';
+import { env } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    if (!env.googleGeminiApiKey) {
+      console.error('GOOGLE_GEMINI_API_KEY is not configured');
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { error: 'Gemini API key is not configured. Please set the GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 500 }
       );
     }
@@ -21,10 +22,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const essayTypeInstructions: Record<string, string> = {
       classic: 'Create a traditional essay outline with introduction (hook, background, thesis), body paragraphs (topic sentences and supporting points), and conclusion.',
       persuasive: 'Create a persuasive essay outline with a strong position statement, supporting arguments with evidence, counterarguments, and a compelling conclusion.',
@@ -36,16 +33,14 @@ export async function POST(request: NextRequest) {
 
     const instruction = essayTypeInstructions[essayType] || essayTypeInstructions.classic;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at creating essay outlines. You provide clear, detailed, and well-structured outlines that help students organize their thoughts.`,
-        },
-        {
-          role: 'user',
-          content: `${instruction}
+    const completion = await createAdvancedCompletion([
+      {
+        role: 'system',
+        content: `You are an expert at creating essay outlines. You provide clear, detailed, and well-structured outlines that help students organize their thoughts.`,
+      },
+      {
+        role: 'user',
+        content: `${instruction}
 
 Topic: "${topic}"
 
@@ -55,10 +50,10 @@ Create a detailed essay outline with:
 - Numbers for supporting details (1, 2, 3)
 
 Make it comprehensive and easy to follow.`,
-        },
-      ],
+      },
+    ], {
       temperature: 0.7,
-      max_tokens: 1500,
+      maxTokens: 1500,
     });
 
     const result = completion.choices[0]?.message?.content || 'No outline generated.';
@@ -68,14 +63,14 @@ Make it comprehensive and easy to follow.`,
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStatus = (error as { status?: number })?.status;
     console.error('Error generating outline:', error);
-    
+
     if (errorStatus === 401) {
       return NextResponse.json(
-        { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
+        { error: 'Invalid Gemini API key. Please check your GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 401 }
       );
     }
-    
+
     if (errorStatus === 429) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
@@ -83,7 +78,7 @@ Make it comprehensive and easy to follow.`,
       );
     }
 
-    const responseMessage = process.env.NODE_ENV === 'development' 
+    const responseMessage = env.nodeEnv === 'development'
       ? `Failed to generate outline: ${errorMessage}`
       : 'Failed to generate outline. Please try again.';
 
@@ -93,4 +88,3 @@ Make it comprehensive and easy to follow.`,
     );
   }
 }
-

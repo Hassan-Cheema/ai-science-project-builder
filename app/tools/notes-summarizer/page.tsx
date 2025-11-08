@@ -1,8 +1,12 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Check, Copy, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useState, useEffect } from 'react';
-import { Loader2, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 type FormData = {
   text: string;
@@ -26,9 +30,11 @@ export default function NotesSummarizerPage() {
     try {
       await navigator.clipboard.writeText(output);
       setCopied(true);
+      toast.success('Copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+      toast.error('Failed to copy to clipboard');
     }
   };
 
@@ -43,18 +49,29 @@ export default function NotesSummarizerPage() {
         body: JSON.stringify({ text: data.text }),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        setOutput(`Error: ${result.error || 'Failed to summarize notes'}`);
+        const errorText = await response.text();
+        let errorMessage = 'Failed to summarize notes';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        toast.error(errorMessage);
+        setOutput(`Error: ${errorMessage}`);
         setIsLoading(false);
         return;
       }
 
+      const result = await response.json();
       setOutput(result.result);
       setIsLoading(false);
-    } catch {
-      setOutput(`Error: Network error. Please try again.`);
+      toast.success('Notes summarized successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+      toast.error(errorMessage);
+      setOutput(`Error: ${errorMessage}`);
       setIsLoading(false);
     }
   };
@@ -62,32 +79,36 @@ export default function NotesSummarizerPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Notes Summarizer</h1>
-        <p className="text-gray-600">Transform long notes into concise summaries</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Notes Summarizer</h1>
+        <p className="text-gray-600 dark:text-gray-400">Transform long notes into concise summaries</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-900">Your Notes</label>
-            <span className="text-sm text-gray-500">{wordCount} words</span>
+            <Label htmlFor="notes-text">Your Notes</Label>
+            <span className="text-sm text-gray-500" aria-live="polite">{wordCount} words</span>
           </div>
-          <textarea
-            {...register('text', { 
+          <Textarea
+            id="notes-text"
+            {...register('text', {
               required: 'Please enter some text to summarize',
               minLength: { value: 10, message: 'Text must be at least 10 characters' }
             })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
+            className="mt-2 resize-none"
             placeholder="Paste your lecture notes, textbook content, or study materials..."
             rows={10}
+            aria-invalid={errors.text ? 'true' : 'false'}
+            aria-describedby={errors.text ? 'notes-error' : undefined}
           />
-          {errors.text && <p className="mt-2 text-sm text-red-600">{errors.text.message}</p>}
+          {errors.text && <p id="notes-error" className="mt-2 text-sm text-red-600" role="alert">{errors.text.message}</p>}
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-gray-800 disabled:bg-gray-400 transition-all flex items-center justify-center gap-2"
+          className="w-full"
+          size="lg"
         >
           {isLoading ? (
             <>
@@ -97,16 +118,18 @@ export default function NotesSummarizerPage() {
           ) : (
             'Summarize'
           )}
-        </button>
+        </Button>
       </form>
 
       {output && (
-        <div className="border border-gray-200 rounded-2xl p-6 space-y-4">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-6 space-y-4 bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Summary</h2>
-            <button
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Summary</h2>
+            <Button
               onClick={handleCopyToClipboard}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
             >
               {copied ? (
                 <>
@@ -119,11 +142,11 @@ export default function NotesSummarizerPage() {
                   Copy
                 </>
               )}
-            </button>
+            </Button>
           </div>
-          
-          <div className="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">
-            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{output}</p>
+
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 max-h-96 overflow-y-auto">
+            <p className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{output}</p>
           </div>
         </div>
       )}

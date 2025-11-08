@@ -3,12 +3,14 @@
 import {
     BookOpen,
     Briefcase,
+    DollarSign,
     FileText,
     FlaskConical,
     HelpCircle,
     Info,
     LayoutDashboard,
     Lightbulb,
+    List,
     RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
@@ -17,12 +19,14 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', Icon: LayoutDashboard },
   { name: 'Essay Helper', href: '/tools/essay-helper', Icon: FileText },
+  { name: 'Essay Outliner', href: '/tools/essay-outliner', Icon: List },
   { name: 'Project Builder', href: '/tools/project-builder', Icon: FlaskConical },
   { name: 'Resume Maker', href: '/tools/resume-maker', Icon: Briefcase },
   { name: 'Notes Summarizer', href: '/tools/notes-summarizer', Icon: BookOpen },
   { name: 'Quiz Generator', href: '/tools/quiz-generator', Icon: HelpCircle },
   { name: 'Idea Generator', href: '/tools/idea-generator', Icon: Lightbulb },
   { name: 'Paraphraser', href: '/tools/paraphraser', Icon: RefreshCw },
+  { name: 'Pricing', href: '/pricing', Icon: DollarSign },
   { name: 'About', href: '/about', Icon: Info },
 ];
 

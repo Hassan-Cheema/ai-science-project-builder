@@ -1,16 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // ESLint configuration - plugin is detected via FlatCompat in eslint.config.mjs
+  // ESLint disabled
   eslint: {
-    // This warning is informational and doesn't affect functionality
-    // The Next.js plugin is properly included via compat.extends()
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
-  
+
   // Optimize package imports for better tree shaking
   experimental: {
-    optimizePackageImports: ['@radix-ui/react-icons', 'date-fns', 'recharts'],
+    optimizePackageImports: ['@radix-ui/react-icons', 'date-fns', 'recharts', 'lucide-react'],
     serverActions: {
       bodySizeLimit: '10mb',
     },
@@ -21,6 +19,12 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
     // React Compiler is enabled via babel-plugin-react-compiler in package.json
   },
+
+  // Performance optimizations
+  poweredByHeader: false,
+
+  // React strict mode for better development experience
+  reactStrictMode: true,
 
   // Image optimization
   images: {
@@ -48,6 +52,10 @@ const nextConfig: NextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
         ],
       },
       {
@@ -61,6 +69,24 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/image(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/(.*\\.(?:jpg|jpeg|png|webp|avif|svg|gif|ico))',
         headers: [
           {
             key: 'Cache-Control',

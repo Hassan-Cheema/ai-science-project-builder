@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+google-cloud-key.json
 # testing
 /coverage
 
@@ -61,6 +61,11 @@ firebase-credentials.json
 credentials/
 *.key
 *.cert
+
+# Google Cloud
+google-cloud-key.json
+**/google-cloud-key.json
+*-gcloud-key.json
 
 # IDE
 .vscode/

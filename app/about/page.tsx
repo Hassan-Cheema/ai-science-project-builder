@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about Auto Inventor's mission to empower students with AI-powered academic tools.",
+  description: "Learn about ScholarBar's mission to empower students with AI-powered academic tools.",
 };
 
 export default function AboutPage() {
@@ -12,7 +12,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <div>
         <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
-          About Auto Inventor
+          About ScholarBar
         </h1>
         <p className="text-xl sm:text-2xl text-gray-600 leading-relaxed">
           We&apos;re democratizing access to AI-powered academic tools for students worldwide.
@@ -32,10 +32,10 @@ export default function AboutPage() {
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
         <div className="prose prose-lg max-w-none">
           <p className="text-gray-700 leading-relaxed mb-4">
-            Auto Inventor started as a simple idea: what if students had access to the same powerful AI tools that professionals use? We saw countless students struggling with time management, writing assignments, and preparing for their futures. That&apos;s when we knew we had to build something different.
+            ScholarBar started as a simple idea: what if students had access to the same powerful AI tools that professionals use? We saw countless students struggling with time management, writing assignments, and preparing for their futures. That&apos;s when we knew we had to build something different.
           </p>
           <p className="text-gray-700 leading-relaxed mb-4">
-            Today, Auto Inventor provides 6 powerful AI tools completely free, helping thousands of students write essays, generate project ideas, create professional resumes, summarize lengthy notes, and prepare for exams with custom quizzes.
+            Today, ScholarBar provides 7 powerful AI tools to help students write essays, generate project ideas, create professional resumes, summarize lengthy notes, prepare for exams with custom quizzes, brainstorm ideas, and paraphrase text naturally.
           </p>
         </div>
       </div>
@@ -86,12 +86,12 @@ export default function AboutPage() {
       <div className="bg-gray-900 rounded-xl p-8 sm:p-10 mb-12 text-white">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div>
-            <div className="text-4xl font-bold mb-2">6</div>
+            <div className="text-4xl font-bold mb-2">7</div>
             <div className="text-gray-300">AI-Powered Tools</div>
           </div>
           <div>
             <div className="text-4xl font-bold mb-2">100%</div>
-            <div className="text-gray-300">Free to Use</div>
+            <div className="text-gray-300">Free to Start</div>
           </div>
           <div>
             <div className="text-4xl font-bold mb-2">24/7</div>
@@ -104,7 +104,7 @@ export default function AboutPage() {
       <div className="text-center bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 sm:p-12 text-white">
         <h2 className="text-2xl sm:text-3xl font-bold mb-4">Ready to Get Started?</h2>
         <p className="text-lg sm:text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of students already using Auto Inventor to accelerate their academic success.
+          Join thousands of students already using ScholarBar to accelerate their academic success.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <Link href="/dashboard">
@@ -117,4 +117,3 @@ export default function AboutPage() {
     </div>
   );
 }
-

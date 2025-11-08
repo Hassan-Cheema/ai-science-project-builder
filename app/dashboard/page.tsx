@@ -8,6 +8,7 @@ import {
     FlaskConical,
     HelpCircle,
     Lightbulb,
+    List,
     RefreshCw,
     Sparkles
 } from 'lucide-react';
@@ -15,6 +16,7 @@ import Link from 'next/link';
 
 const tools = [
   { name: 'Essay Helper', IconComponent: FileText, href: '/tools/essay-helper', desc: 'Write essays & create outlines', featured: false },
+  { name: 'Essay Outliner', IconComponent: List, href: '/tools/essay-outliner', desc: 'Create structured outlines', featured: false },
   { name: 'Resume Maker', IconComponent: Briefcase, href: '/tools/resume-maker', desc: 'Build pro resumes + PDF', featured: false },
   { name: 'Project Builder', IconComponent: FlaskConical, href: '/tools/project-builder', desc: 'Create science projects', featured: false },
   { name: 'Quiz Generator', IconComponent: HelpCircle, href: '/tools/quiz-generator', desc: 'Practice with AI quizzes', featured: false },
@@ -26,11 +28,12 @@ const tools = [
 const toolColors = [
   { gradient: 'from-blue-500 to-cyan-500', bg: 'bg-blue-50', border: 'border-blue-100' },
   { gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-50', border: 'border-purple-100' },
+  { gradient: 'from-pink-500 to-rose-500', bg: 'bg-pink-50', border: 'border-pink-100' },
   { gradient: 'from-green-500 to-emerald-500', bg: 'bg-green-50', border: 'border-green-100' },
   { gradient: 'from-orange-500 to-red-500', bg: 'bg-orange-50', border: 'border-orange-100' },
   { gradient: 'from-indigo-500 to-blue-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
   { gradient: 'from-yellow-500 to-orange-500', bg: 'bg-yellow-50', border: 'border-yellow-100' },
-  { gradient: 'from-pink-500 to-rose-500', bg: 'bg-pink-50', border: 'border-pink-100' },
+  { gradient: 'from-teal-500 to-cyan-500', bg: 'bg-teal-50', border: 'border-teal-100' },
 ];
 
 export default function DashboardPage() {
@@ -40,7 +43,7 @@ export default function DashboardPage() {
       <div className="mb-12">
         <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
           <Sparkles className="w-3 h-3 text-blue-500" />
-          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">7 Advanced AI Tools Available</span>
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">8 Advanced AI Tools Available</span>
         </div>
         <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
           Dashboard

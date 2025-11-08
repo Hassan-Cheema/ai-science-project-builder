@@ -1,5 +1,5 @@
-// Service Worker for Auto Inventor - Optimized for LCP and TBT
-// const CACHE_NAME = 'auto-inventor-v1'; // Unused, keeping for future use
+// Service Worker for ScholarBar - Optimized for LCP and TBT
+// const CACHE_NAME = 'scholarbar-v1'; // Unused, keeping for future use
 const STATIC_CACHE = 'static-v1';
 const DYNAMIC_CACHE = 'dynamic-v1';
 

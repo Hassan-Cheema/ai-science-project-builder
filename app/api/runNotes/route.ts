@@ -1,13 +1,14 @@
+import { env } from '@/lib/env';
+import { createAdvancedCompletion } from '@/lib/gemini-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    if (!env.googleGeminiApiKey) {
+      console.error('GOOGLE_GEMINI_API_KEY is not configured');
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { error: 'Gemini API key is not configured. Please set the GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 500 }
       );
     }
@@ -31,26 +32,19 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    // Call OpenAI GPT-4o-mini
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert at summarizing academic content and creating concise, clear study notes. You extract key information and present it in an organized, easy-to-study format.',
-        },
-        {
-          role: 'user',
-          content: `Summarize the following text into concise study notes with bullet points:\n\n${text}`,
-        },
-      ],
+    // Call Gemini API
+    const completion = await createAdvancedCompletion([
+      {
+        role: 'system',
+        content: 'You are an expert at summarizing academic content and creating concise, clear study notes. You extract key information and present it in an organized, easy-to-study format.',
+      },
+      {
+        role: 'user',
+        content: `Summarize the following text into concise study notes with bullet points:\n\n${text}`,
+      },
+    ], {
       temperature: 0.7,
-      max_tokens: 1500,
+      maxTokens: 1500,
     });
 
     const result = completion.choices[0]?.message?.content || 'No summary generated.';
@@ -67,10 +61,10 @@ export async function POST(request: NextRequest) {
       type: errorType,
     });
 
-    // Handle OpenAI API errors
+    // Handle Gemini API errors
     if (errorStatus === 401) {
       return NextResponse.json(
-        { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
+        { error: 'Invalid Gemini API key. Please check your GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 401 }
       );
     }
@@ -91,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return more detailed error message in development
-    const responseMessage = process.env.NODE_ENV === 'development'
+    const responseMessage = env.nodeEnv === 'development'
       ? `Failed to summarize notes: ${errorMessage}`
       : 'Failed to summarize notes. Please try again.';
 

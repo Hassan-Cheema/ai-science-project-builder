@@ -1,12 +1,12 @@
 // Enhanced Essay Generator API with advanced features
+import { env } from '@/lib/env';
+import { createAdvancedCompletion, DEFAULT_MODELS } from '@/lib/gemini-enhanced';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createAdvancedCompletion, DEFAULT_MODELS } from '@/lib/openai-enhanced';
-import { checkRateLimit } from '@/lib/rate-limit';
-import { env } from '@/lib/env';
 
 // Runtime configuration
-export const runtime = 'edge'; // Use Edge runtime for better performance
+// Note: Edge runtime removed - Gemini SDK requires Node.js APIs
 export const maxDuration = 60; // Max duration in seconds
 
 // Input validation schema
@@ -16,7 +16,7 @@ const essayRequestSchema = z.object({
   essayType: z.enum(['classic', 'persuasive', 'personal', 'book-report', 'critique', 'compare']).default('classic'),
   writingStyle: z.enum(['standard', 'clone', 'custom']).default('standard'),
   customStyle: z.string().optional(),
-  model: z.enum(['gpt-4o', 'gpt-4o-mini', 'o1-preview']).optional(),
+  model: z.enum(['gemini-1.5-pro-latest', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-8b-latest']).optional(),
   userId: z.string().optional(),
 });
 
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const validatedData = essayRequestSchema.parse(body);
     const { topic, words, essayType, writingStyle, customStyle, model, userId } = validatedData;
 
-    // Select model (default to GPT-4o for better quality)
+    // Select model (default to Gemini Pro for better quality)
     const selectedModel = model || DEFAULT_MODELS.quality;
 
     // Build enhanced prompt based on essay type and style
@@ -151,6 +151,7 @@ Make it well-researched, properly structured, and compelling. Ensure it meets ac
     );
   } catch (error: unknown) {
     console.error('Error generating essay:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
@@ -165,18 +166,23 @@ Make it well-researched, properly structured, and compelling. Ensure it meets ac
 
     const errorStatus = (error as { status?: number })?.status;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorString = errorMessage.toLowerCase();
 
-    // Handle OpenAI API errors
-    if (errorStatus === 401) {
+    // Check if it's a Gemini API key error
+    if (errorString.includes('api key') || errorString.includes('gemini') || errorString.includes('google') || errorStatus === 401) {
       return NextResponse.json(
-        { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
+        {
+          error: 'Gemini API error: ' + errorMessage,
+          hint: 'Please check your GOOGLE_GEMINI_API_KEY in .env file and restart the server',
+        },
         { status: 401 }
       );
     }
 
+    // Handle Gemini API errors
     if (errorStatus === 429) {
       return NextResponse.json(
-        { error: 'OpenAI rate limit exceeded. Please try again later.' },
+        { error: 'Gemini API rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
@@ -186,6 +192,12 @@ Make it well-researched, properly structured, and compelling. Ensure it meets ac
       ? `Failed to generate essay: ${errorMessage}`
       : 'Failed to generate essay. Please try again.';
 
-    return NextResponse.json({ error: responseMessage }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: responseMessage,
+        details: env.nodeEnv === 'development' ? errorMessage : undefined,
+      },
+      { status: 500 }
+    );
   }
 }

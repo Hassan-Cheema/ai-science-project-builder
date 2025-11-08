@@ -19,7 +19,7 @@ export default function SuccessPage() {
         
         <CardContent className="space-y-6">
           <p className="text-lg text-gray-600">
-            Thank you for subscribing to Auto Inventor. Your account has been upgraded successfully.
+            Thank you for subscribing to ScholarBar. Your account has been upgraded successfully.
           </p>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

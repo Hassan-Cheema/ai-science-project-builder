@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { createAdvancedCompletion } from '@/lib/gemini-enhanced';
+import { env } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    if (!env.googleGeminiApiKey) {
+      console.error('GOOGLE_GEMINI_API_KEY is not configured');
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { error: 'Gemini API key is not configured. Please set the GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 500 }
       );
     }
@@ -38,11 +39,6 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     // Build prompt based on mode
     const systemPrompt = mode === 'humanize'
       ? 'You are an expert at making AI-generated text sound natural and human-written. Your task is to rewrite text to feel authentic, natural, and human-like. Remove AI-like patterns, vary sentence structure, add natural flow, and make it sound like a real person wrote it. Preserve the original meaning while making it sound completely human and original.'
@@ -52,21 +48,19 @@ export async function POST(request: NextRequest) {
       ? `Rewrite the following text to make it sound natural and human-written. Remove any AI-like patterns and make it feel authentic:\n\n${text}`
       : `Paraphrase the following text while maintaining its original meaning:\n\n${text}`;
 
-    // Call OpenAI GPT-4o-mini
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
+    // Call Gemini API
+    const completion = await createAdvancedCompletion([
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
+      {
+        role: 'user',
+        content: userPrompt,
+      },
+    ], {
       temperature: mode === 'humanize' ? 0.8 : 0.7,
-      max_tokens: Math.min(4000, text.length * 3),
+      maxTokens: Math.min(4000, text.length * 3),
     });
 
     const result = completion.choices[0]?.message?.content || 'No result generated.';
@@ -83,10 +77,10 @@ export async function POST(request: NextRequest) {
       type: errorType,
     });
 
-    // Handle OpenAI API errors
+    // Handle Gemini API errors
     if (errorStatus === 401) {
       return NextResponse.json(
-        { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
+        { error: 'Invalid Gemini API key. Please check your GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 401 }
       );
     }
@@ -107,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return more detailed error message in development
-    const responseMessage = process.env.NODE_ENV === 'development'
+    const responseMessage = env.nodeEnv === 'development'
       ? `Failed to process text: ${errorMessage}`
       : 'Failed to process text. Please try again.';
 

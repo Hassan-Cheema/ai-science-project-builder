@@ -1,21 +1,21 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://auto-inventor.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://scholarbar.com';
 
   const routes = [
     '',
     '/dashboard',
+    '/pricing',
     '/tools/essay-helper',
-    '/tools/essay-writer',
     '/tools/essay-outliner',
     '/tools/project-builder',
     '/tools/resume-maker',
     '/tools/notes-summarizer',
     '/tools/quiz-generator',
     '/tools/idea-generator',
+    '/tools/paraphraser',
     '/about',
-    '/pricing',
   ];
 
   return routes.map((route) => ({

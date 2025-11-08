@@ -1,7 +1,8 @@
 'use client';
 
+import { ArrowLeft, ArrowRight, Check, Copy, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Loader2, Copy, Check, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 type EssayData = {
   topic: string;
@@ -60,23 +61,33 @@ export default function EssayWriterPage() {
       const result = JSON.parse(responseText);
 
       if (!response.ok) {
-        setOutput(`Error: ${result.error || 'Failed to generate essay'}`);
+        const errorMessage = result.error || 'Failed to generate essay';
+        toast.error(errorMessage);
+        setOutput(`Error: ${errorMessage}`);
         setIsLoading(false);
         return;
       }
 
       setOutput(result.result);
       setIsLoading(false);
-    } catch {
-      setOutput(`Error: Network error. Please try again.`);
+      toast.success('Essay generated successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+      toast.error(errorMessage);
+      setOutput(`Error: ${errorMessage}`);
       setIsLoading(false);
     }
   };
 
   const handleCopyToClipboard = async () => {
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(output);
+      setCopied(true);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   return (
@@ -94,15 +105,15 @@ export default function EssayWriterPage() {
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
               </button>
             )}
-            
+
             {/* Steps */}
             <div className="flex items-center gap-8 mx-auto">
               {steps.map((step, index) => (
                 <div key={step.number} className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
-                      step.number === currentStep 
-                        ? 'bg-gray-900 text-white' 
+                      step.number === currentStep
+                        ? 'bg-gray-900 text-white'
                         : step.number < currentStep
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-200 text-gray-500'
@@ -128,7 +139,7 @@ export default function EssayWriterPage() {
       {/* Content Area */}
       <div className="px-8 py-16">
         <div className="max-w-4xl mx-auto">
-          
+
           {/* STEP 1: Topic */}
           {currentStep === 1 && (
             <div className="space-y-12">

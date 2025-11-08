@@ -1,13 +1,14 @@
+import { env } from '@/lib/env';
+import { createStreamingCompletion } from '@/lib/gemini-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    if (!env.googleGeminiApiKey) {
+      console.error('GOOGLE_GEMINI_API_KEY is not configured');
       return NextResponse.json(
-        { error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { error: 'Gemini API key is not configured. Please set the GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 500 }
       );
     }
@@ -45,11 +46,6 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     // Build context-aware instructions based on budget and goal
     const budgetGuidance = {
       Low: 'Use only basic household items and inexpensive materials (under $20). Focus on creativity with common items like baking soda, vinegar, paper, string, etc. Provide exact quantities and where to obtain materials. Include alternatives if certain items are not available.',
@@ -74,13 +70,11 @@ export async function POST(request: NextRequest) {
       '12': 'High school senior - Advanced research, publication-ready quality, original contribution potential',
     };
 
-    // Use GPT-4o for world-class quality (best model for comprehensive responses)
-    const useModel = 'gpt-4o';
+    // Use Gemini Flash (latest) for API-key friendly streaming responses
+    const useModel = 'gemini-1.5-flash-latest';
 
-    // Call OpenAI with enhanced prompt for world-class results
-    const stream = await openai.chat.completions.create({
-      model: useModel,
-      messages: [
+    // Call Gemini with enhanced prompt for world-class results
+    const stream = createStreamingCompletion([
         {
           role: 'system',
           content: `You are a world-renowned science educator, curriculum designer, and research scientist with decades of experience creating award-winning science projects. You have a PhD in Science Education, have mentored hundreds of science fair winners, and your projects have won international competitions.
@@ -291,10 +285,12 @@ This project plan must be:
 Write with the depth, detail, and quality expected from a world-class science education resource. Every section should be thorough, actionable, and inspiring.`,
         },
       ],
-      temperature: 0.8, // Slightly higher for more creativity while maintaining quality
-      max_tokens: 4000, // Increased for comprehensive responses
-      stream: true,
-    });
+      {
+        model: useModel,
+        temperature: 0.8, // Slightly higher for more creativity while maintaining quality
+        maxTokens: 4000, // Increased for comprehensive responses
+      }
+    );
 
     // Create a readable stream for the response
     const encoder = new TextEncoder();
@@ -308,8 +304,11 @@ Write with the depth, detail, and quality expected from a world-class science ed
             }
           }
           controller.close();
-        } catch (error) {
-          controller.error(error);
+        } catch (streamError) {
+          console.error('Streaming error:', streamError);
+          const errorMsg = streamError instanceof Error ? streamError.message : 'Streaming failed';
+          controller.enqueue(encoder.encode(`\n\n[Error: ${errorMsg}]`));
+          controller.close();
         }
       },
     });
@@ -334,10 +333,10 @@ Write with the depth, detail, and quality expected from a world-class science ed
       type: errorType,
     });
 
-    // Handle OpenAI API errors
+    // Handle Gemini API errors
     if (errorStatus === 401) {
       return NextResponse.json(
-        { error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env.local' },
+        { error: 'Invalid Gemini API key. Please check your GOOGLE_GEMINI_API_KEY environment variable.' },
         { status: 401 }
       );
     }
@@ -357,7 +356,7 @@ Write with the depth, detail, and quality expected from a world-class science ed
     }
 
     // Return more detailed error message in development
-    const responseMessage = process.env.NODE_ENV === 'development'
+    const responseMessage = env.nodeEnv === 'development'
       ? `Failed to generate project: ${errorMessage}`
       : 'Failed to generate project. Please try again.';
 

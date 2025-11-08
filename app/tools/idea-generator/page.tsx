@@ -1,8 +1,19 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { Check, Copy, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { Loader2, Copy, Check } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type FormData = {
   topic: string;
@@ -15,22 +26,23 @@ interface Idea {
 }
 
 export default function IdeaGeneratorPage() {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, formState: { errors }, control } = useForm<FormData>();
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopyAll = async () => {
     try {
-      const allIdeas = ideas.map((idea, index) => 
+      const allIdeas = ideas.map((idea, index) =>
         `${index + 1}. ${idea.title}\n${idea.description}\n`
       ).join('\n');
-      
+
       await navigator.clipboard.writeText(allIdeas);
       setCopied(true);
+      toast.success('All ideas copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+    } catch {
+      toast.error('Failed to copy to clipboard');
     }
   };
 
@@ -45,18 +57,35 @@ export default function IdeaGeneratorPage() {
         body: JSON.stringify({ topic: data.topic, type: data.type }),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to generate ideas';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        toast.error(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+
       const result = await response.json();
 
-      if (!response.ok) {
-        alert(`Error: ${result.error || 'Failed to generate ideas'}`);
+      // Validate response structure
+      if (!result.ideas || !Array.isArray(result.ideas)) {
+        toast.error('Invalid response format');
         setIsLoading(false);
         return;
       }
 
       setIdeas(result.ideas);
       setIsLoading(false);
-    } catch {
-      alert(`Error: Network error. Please try again.`);
+      toast.success('Ideas generated successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };
@@ -70,34 +99,46 @@ export default function IdeaGeneratorPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Topic or Field</label>
-          <input
+          <Label htmlFor="topic">Topic or Field</Label>
+          <Input
+            id="topic"
             {...register('topic', { required: 'Topic is required' })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
             placeholder="e.g., AI, Healthcare, Education"
+            className="mt-2"
+            aria-invalid={errors.topic ? 'true' : 'false'}
+            aria-describedby={errors.topic ? 'topic-error' : undefined}
           />
-          {errors.topic && <p className="mt-2 text-sm text-red-600">{errors.topic.message}</p>}
+          {errors.topic && <p id="topic-error" className="mt-2 text-sm text-red-600" role="alert">{errors.topic.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Type of Ideas</label>
-          <select
-            {...register('type', { required: 'Type is required' })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
-          >
-            <option value="">Select type</option>
-            <option value="Project">Project</option>
-            <option value="Startup">Startup</option>
-            <option value="Research">Research</option>
-            <option value="Random">Random</option>
-          </select>
-          {errors.type && <p className="mt-2 text-sm text-red-600">{errors.type.message}</p>}
+          <Label htmlFor="type">Type of Ideas</Label>
+          <Controller
+            name="type"
+            control={control}
+            rules={{ required: 'Type is required' }}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="type" className="mt-2 w-full" aria-invalid={errors.type ? 'true' : 'false'}>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Project">Project</SelectItem>
+                  <SelectItem value="Startup">Startup</SelectItem>
+                  <SelectItem value="Research">Research</SelectItem>
+                  <SelectItem value="Random">Random</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.type && <p id="type-error" className="mt-2 text-sm text-red-600" role="alert">{errors.type.message}</p>}
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-gray-800 disabled:bg-gray-400 transition-all flex items-center justify-center gap-2"
+          className="w-full"
+          size="lg"
         >
           {isLoading ? (
             <>
@@ -107,7 +148,7 @@ export default function IdeaGeneratorPage() {
           ) : (
             'Generate Ideas'
           )}
-        </button>
+        </Button>
       </form>
 
       {isLoading && (
@@ -120,9 +161,11 @@ export default function IdeaGeneratorPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">Your Ideas</h2>
-            <button
+            <Button
               onClick={handleCopyAll}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
             >
               {copied ? (
                 <>
@@ -135,7 +178,7 @@ export default function IdeaGeneratorPage() {
                   Copy All
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

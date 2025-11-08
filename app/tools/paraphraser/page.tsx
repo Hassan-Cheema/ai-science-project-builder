@@ -1,8 +1,12 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Check, Copy, Loader2, RefreshCw, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 type FormData = {
   text: string;
@@ -32,9 +36,11 @@ export default function ParaphraserPage() {
     try {
       await navigator.clipboard.writeText(output);
       setCopied(true);
+      toast.success('Copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+      toast.error('Failed to copy to clipboard');
     }
   };
 
@@ -52,18 +58,29 @@ export default function ParaphraserPage() {
         }),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        setOutput(`Error: ${result.error || 'Failed to process text'}`);
+        const errorText = await response.text();
+        let errorMessage = 'Failed to process text';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        toast.error(errorMessage);
+        setOutput(`Error: ${errorMessage}`);
         setIsLoading(false);
         return;
       }
 
+      const result = await response.json();
       setOutput(result.result);
       setIsLoading(false);
-    } catch {
-      setOutput(`Error: Network error. Please try again.`);
+      toast.success(modeValue === 'humanize' ? 'Text humanized successfully!' : 'Text paraphrased successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+      toast.error(errorMessage);
+      setOutput(`Error: ${errorMessage}`);
       setIsLoading(false);
     }
   };
@@ -78,47 +95,53 @@ export default function ParaphraserPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Mode Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-3">Mode</label>
+          <Label className="mb-3">Mode</Label>
           <div className="grid grid-cols-2 gap-4">
-            <button
+            <Button
               type="button"
+              variant={modeValue === 'paraphrase' ? 'default' : 'outline'}
               onClick={() => setValue('mode', 'paraphrase', { shouldValidate: true })}
-              className={`p-4 border-2 rounded-xl transition-all text-left ${
+              className={`h-auto p-4 justify-start text-left ${
                 modeValue === 'paraphrase'
-                  ? 'border-gray-900 bg-white ring-4 ring-gray-900/10'
-                  : 'border-gray-200 hover:border-gray-400 bg-white'
+                  ? 'ring-4 ring-gray-900/10'
+                  : ''
               }`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <RefreshCw className={`w-5 h-5 ${modeValue === 'paraphrase' ? 'text-gray-900' : 'text-gray-400'}`} />
-                <span className={`font-bold text-lg ${modeValue === 'paraphrase' ? 'text-gray-900' : 'text-gray-700'}`}>
-                  Paraphrase
-                </span>
+              <div className="w-full">
+                <div className="flex items-center gap-2 mb-2">
+                  <RefreshCw className={`w-5 h-5 ${modeValue === 'paraphrase' ? 'text-gray-900' : 'text-gray-400'}`} />
+                  <span className={`font-bold text-lg ${modeValue === 'paraphrase' ? 'text-gray-900' : 'text-gray-700'}`}>
+                    Paraphrase
+                  </span>
+                </div>
+                <p className={`text-sm ${modeValue === 'paraphrase' ? 'text-gray-600' : 'text-gray-500'}`}>
+                  Rewrite text with different words while keeping the same meaning
+                </p>
               </div>
-              <p className={`text-sm ${modeValue === 'paraphrase' ? 'text-gray-600' : 'text-gray-500'}`}>
-                Rewrite text with different words while keeping the same meaning
-              </p>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant={modeValue === 'humanize' ? 'default' : 'outline'}
               onClick={() => setValue('mode', 'humanize', { shouldValidate: true })}
-              className={`p-4 border-2 rounded-xl transition-all text-left ${
+              className={`h-auto p-4 justify-start text-left ${
                 modeValue === 'humanize'
-                  ? 'border-gray-900 bg-white ring-4 ring-gray-900/10'
-                  : 'border-gray-200 hover:border-gray-400 bg-white'
+                  ? 'ring-4 ring-gray-900/10'
+                  : ''
               }`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <User className={`w-5 h-5 ${modeValue === 'humanize' ? 'text-gray-900' : 'text-gray-400'}`} />
-                <span className={`font-bold text-lg ${modeValue === 'humanize' ? 'text-gray-900' : 'text-gray-700'}`}>
-                  Humanize
-                </span>
+              <div className="w-full">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className={`w-5 h-5 ${modeValue === 'humanize' ? 'text-gray-900' : 'text-gray-400'}`} />
+                  <span className={`font-bold text-lg ${modeValue === 'humanize' ? 'text-gray-900' : 'text-gray-700'}`}>
+                    Humanize
+                  </span>
+                </div>
+                <p className={`text-sm ${modeValue === 'humanize' ? 'text-gray-600' : 'text-gray-500'}`}>
+                  Make AI-generated text sound natural and human-written
+                </p>
               </div>
-              <p className={`text-sm ${modeValue === 'humanize' ? 'text-gray-600' : 'text-gray-500'}`}>
-                Make AI-generated text sound natural and human-written
-              </p>
-            </button>
+            </Button>
           </div>
           <input type="hidden" {...register('mode', { required: true })} />
         </div>
@@ -126,27 +149,31 @@ export default function ParaphraserPage() {
         {/* Text Input */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-900">Your Text</label>
-            <span className="text-sm text-gray-500">{wordCount} words</span>
+            <Label htmlFor="text-input">Your Text</Label>
+            <span className="text-sm text-gray-500" aria-live="polite">{wordCount} words</span>
           </div>
-          <textarea
+          <Textarea
+            id="text-input"
             {...register('text', {
               required: 'Please enter some text to process',
               minLength: { value: 10, message: 'Text must be at least 10 characters' }
             })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
+            className="mt-2 resize-none"
             placeholder={modeValue === 'humanize'
               ? 'Paste AI-generated text here to make it sound more human...'
               : 'Paste your text here to paraphrase it...'}
             rows={10}
+            aria-invalid={errors.text ? 'true' : 'false'}
+            aria-describedby={errors.text ? 'text-error' : undefined}
           />
-          {errors.text && <p className="mt-2 text-sm text-red-600">{errors.text.message}</p>}
+          {errors.text && <p id="text-error" className="mt-2 text-sm text-red-600" role="alert">{errors.text.message}</p>}
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-gray-800 disabled:bg-gray-400 transition-all flex items-center justify-center gap-2"
+          className="w-full"
+          size="lg"
         >
           {isLoading ? (
             <>
@@ -168,7 +195,7 @@ export default function ParaphraserPage() {
               )}
             </>
           )}
-        </button>
+        </Button>
       </form>
 
       {output && (
@@ -177,9 +204,11 @@ export default function ParaphraserPage() {
             <h2 className="text-lg font-semibold text-gray-900">
               {modeValue === 'humanize' ? 'Humanized Text' : 'Paraphrased Text'}
             </h2>
-            <button
+            <Button
               onClick={handleCopyToClipboard}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
             >
               {copied ? (
                 <>
@@ -192,7 +221,7 @@ export default function ParaphraserPage() {
                   Copy
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           <div className="bg-gray-50 rounded-xl p-6 max-h-96 overflow-y-auto">

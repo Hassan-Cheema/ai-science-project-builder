@@ -1,24 +1,24 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Suspense, lazy, useEffect } from 'react';
-import {
-  FileText,
-  Briefcase,
-  FlaskConical,
-  HelpCircle,
-  BookOpen,
-  Lightbulb
-} from 'lucide-react';
 
-// Defer non-critical components to reduce TBT
+// Lazy load all icons to reduce initial bundle
+const FileText = lazy(() => import('lucide-react').then(module => ({ default: module.FileText })));
+const Briefcase = lazy(() => import('lucide-react').then(module => ({ default: module.Briefcase })));
+const FlaskConical = lazy(() => import('lucide-react').then(module => ({ default: module.FlaskConical })));
+const HelpCircle = lazy(() => import('lucide-react').then(module => ({ default: module.HelpCircle })));
+const BookOpen = lazy(() => import('lucide-react').then(module => ({ default: module.BookOpen })));
+const Lightbulb = lazy(() => import('lucide-react').then(module => ({ default: module.Lightbulb })));
+const List = lazy(() => import('lucide-react').then(module => ({ default: module.List })));
 const ArrowRight = lazy(() => import('lucide-react').then(module => ({ default: module.ArrowRight })));
 
 // Structured data for SEO
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Auto Inventor",
+  "name": "ScholarBar",
   "applicationCategory": "EducationalApplication",
   "offers": {
     "@type": "Offer",
@@ -50,8 +50,7 @@ function ToolCardSkeleton() {
 function HeroSection() {
   return (
     <section className="min-h-screen flex items-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 -z-10" />
+          {/* Removed expensive gradient background for better performance */}
 
       <div className="max-w-7xl mx-auto w-full">
         <div className="max-w-4xl animate-fade-in">
@@ -73,14 +72,14 @@ function HeroSection() {
           </p>
 
           {/* Modern CTA */}
-          <Link href="/dashboard">
-            <button className="group relative bg-gray-900 hover:bg-gray-800 text-white text-base font-semibold px-6 py-3 rounded-xl inline-flex items-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]">
+          <Button size="lg" className="group" asChild>
+            <Link href="/dashboard" prefetch={false}>
               <span>Get Started</span>
               <Suspense fallback={<div className="w-4 h-4"></div>}>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Suspense>
-            </button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -91,7 +90,8 @@ function HeroSection() {
 function ToolsSection() {
   const tools = [
     { name: 'Essay Helper', IconComponent: FileText, href: '/tools/essay-helper', color: 'from-blue-500 to-cyan-500' },
-    { name: 'Resume Maker', IconComponent: Briefcase, href: '/tools/resume-maker', color: 'from-purple-500 to-pink-500' },
+    { name: 'Essay Outliner', IconComponent: List, href: '/tools/essay-outliner', color: 'from-purple-500 to-pink-500' },
+    { name: 'Resume Maker', IconComponent: Briefcase, href: '/tools/resume-maker', color: 'from-pink-500 to-rose-500' },
     { name: 'Project Builder', IconComponent: FlaskConical, href: '/tools/project-builder', color: 'from-green-500 to-emerald-500' },
     { name: 'Quiz Generator', IconComponent: HelpCircle, href: '/tools/quiz-generator', color: 'from-orange-500 to-red-500' },
     { name: 'Notes Summarizer', IconComponent: BookOpen, href: '/tools/notes-summarizer', color: 'from-indigo-500 to-blue-500' },
@@ -110,10 +110,12 @@ function ToolsSection() {
           {tools.map((tool, i) => {
             const IconComponent = tool.IconComponent;
             return (
-              <Link key={i} href={tool.href} className="hover-lift ai-glow">
+              <Link key={i} href={tool.href} className="hover-lift" prefetch={false}>
                 <div className="group bg-white border border-gray-200 rounded-2xl p-6 h-full flex flex-col justify-between transition-all duration-200 hover:border-gray-300">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
-                    <IconComponent className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    <Suspense fallback={<div className="w-6 h-6 bg-white/30 rounded" />}>
+                      <IconComponent className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    </Suspense>
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors">{tool.name}</h3>
@@ -148,14 +150,14 @@ function CTASection() {
         <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
           Join thousands of students using AI to write better, learn faster, and achieve more.
         </p>
-        <Link href="/dashboard">
-          <button className="group relative bg-gray-900 hover:bg-gray-800 text-white text-lg font-semibold px-8 py-4 rounded-xl inline-flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]">
+        <Button size="lg" className="group text-lg px-8 py-4" asChild>
+          <Link href="/dashboard" prefetch={false}>
             <span>Open Dashboard</span>
             <Suspense fallback={<div className="w-5 h-5"></div>}>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
             </Suspense>
-          </button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </section>
   );

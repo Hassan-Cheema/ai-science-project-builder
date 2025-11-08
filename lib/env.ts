@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 // Environment schema for validation
 const envSchema = z.object({
-  // OpenAI Configuration
-  OPENAI_API_KEY: z.string().min(1, 'OpenAI API key is required'),
+  // OpenAI Configuration (optional - deprecated, using Gemini instead)
+  OPENAI_API_KEY: z.string().optional(),
 
   // Stripe Configuration
   STRIPE_SECRET_KEY: z.string().optional(),
@@ -31,6 +31,16 @@ const envSchema = z.object({
   ENABLE_VECTOR_SEARCH: z.string().transform(val => val === 'true').default('false'),
   ENABLE_IMAGE_GENERATION: z.string().transform(val => val === 'true').default('false'),
   ENABLE_CODE_GENERATION: z.string().transform(val => val === 'true').default('true'),
+
+  // Google Cloud / Gemini Configuration
+  GOOGLE_CLOUD_PROJECT_ID: z.string().optional(),
+  GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
+  GOOGLE_CLOUD_STORAGE_BUCKET: z.string().optional(),
+  GOOGLE_GEMINI_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
+  GOOGLE_CLOUD_REGION: z.string().optional(),
+  GOOGLE_GENAI_USE_VERTEXAI: z.string().optional(),
 });
 
 // Parse and validate environment variables
@@ -81,14 +91,28 @@ export const env = {
   enableVectorSearch: process.env.ENABLE_VECTOR_SEARCH === 'true',
   enableImageGeneration: process.env.ENABLE_IMAGE_GENERATION === 'true',
   enableCodeGeneration: process.env.ENABLE_CODE_GENERATION !== 'false',
+
+  // Google Cloud Configuration
+  googleCloudProjectId: process.env.GOOGLE_CLOUD_PROJECT_ID || '',
+  googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
+  googleCloudStorageBucket: process.env.GOOGLE_CLOUD_STORAGE_BUCKET || '',
+  googleGeminiApiKey: process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  googleTranslateApiKey: process.env.GOOGLE_TRANSLATE_API_KEY || '',
+  googleCloudRegion: process.env.GOOGLE_CLOUD_REGION || 'us-central1',
+  googleGenaiUseVertexAi: (process.env.GOOGLE_GENAI_USE_VERTEXAI || '').toLowerCase() === 'true',
 };
 
 // Validate required environment variables
 export function validateEnv() {
   const errors: string[] = [];
 
-  if (!env.openaiApiKey) {
-    errors.push('OPENAI_API_KEY is required');
+  if (!env.googleGeminiApiKey) {
+    errors.push('GOOGLE_GEMINI_API_KEY or GEMINI_API_KEY is required');
+  }
+
+  if (env.googleGenaiUseVertexAi && !env.googleCloudProjectId) {
+    errors.push('GOOGLE_CLOUD_PROJECT_ID is required when GOOGLE_GENAI_USE_VERTEXAI is true');
   }
 
   if (errors.length > 0 && env.nodeEnv === 'production') {
@@ -110,6 +134,11 @@ export const features = {
   imageGeneration: env.enableImageGeneration,
   codeGeneration: env.enableCodeGeneration,
   monitoring: Boolean(env.sentryDsn),
+  googleCloud: Boolean(env.googleCloudProjectId || env.googleGeminiApiKey),
+  googleGemini: Boolean(env.googleGeminiApiKey),
+  googleStorage: Boolean(env.googleCloudStorageBucket),
+  googleFirestore: Boolean(env.googleCloudProjectId),
+  vertexEnabled: env.googleGenaiUseVertexAi,
 };
 
 // Export validated env (for use in runtime)

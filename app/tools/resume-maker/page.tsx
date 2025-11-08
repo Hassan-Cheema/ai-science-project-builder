@@ -4,6 +4,7 @@ import { ResumeTemplate } from '@/app/components/resume-template';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 type FormData = {
   name: string;
@@ -46,10 +47,13 @@ export default function ResumeMakerPage() {
         } catch {
           errorMessage = errorText || errorMessage;
         }
+        toast.error(errorMessage);
         setOutput(`Error: ${errorMessage}`);
         setIsLoading(false);
         return;
       }
+
+      toast.success('Resume generation started!');
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -70,8 +74,11 @@ export default function ResumeMakerPage() {
       }
 
       setIsLoading(false);
-    } catch {
-      setOutput(`Error: Network error. Please try again.`);
+      toast.success('Resume generated successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error. Please try again.';
+      toast.error(errorMessage);
+      setOutput(`Error: ${errorMessage}`);
       setIsLoading(false);
     }
   };
@@ -86,53 +93,66 @@ export default function ResumeMakerPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Full Name</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">Full Name</label>
             <input
+              id="name"
               {...register('name', { required: 'Name is required' })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
               placeholder="John Doe"
+              aria-invalid={errors.name ? 'true' : 'false'}
+              aria-describedby={errors.name ? 'name-error' : undefined}
             />
-            {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
+            {errors.name && <p id="name-error" className="mt-2 text-sm text-red-600" role="alert">{errors.name.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Target Role</label>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-2">Target Role</label>
             <input
+              id="role"
               {...register('role', { required: 'Role is required' })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
               placeholder="Software Engineer"
+              aria-invalid={errors.role ? 'true' : 'false'}
+              aria-describedby={errors.role ? 'role-error' : undefined}
             />
-            {errors.role && <p className="mt-2 text-sm text-red-600">{errors.role.message}</p>}
+            {errors.role && <p id="role-error" className="mt-2 text-sm text-red-600" role="alert">{errors.role.message}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Skills</label>
+          <label htmlFor="skills" className="block text-sm font-medium text-gray-900 mb-2">Skills</label>
           <textarea
+            id="skills"
             {...register('skills', { required: 'Skills are required' })}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
             placeholder="JavaScript, React, Node.js, Team Leadership..."
             rows={3}
+            aria-invalid={errors.skills ? 'true' : 'false'}
+            aria-describedby={errors.skills ? 'skills-error' : undefined}
           />
-          {errors.skills && <p className="mt-2 text-sm text-red-600">{errors.skills.message}</p>}
+          {errors.skills && <p id="skills-error" className="mt-2 text-sm text-red-600" role="alert">{errors.skills.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Work Experience</label>
+          <label htmlFor="experience" className="block text-sm font-medium text-gray-900 mb-2">Work Experience</label>
           <textarea
+            id="experience"
             {...register('experience', { required: 'Experience is required' })}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
             placeholder="Describe your work experience, achievements, and responsibilities..."
             rows={5}
+            aria-invalid={errors.experience ? 'true' : 'false'}
+            aria-describedby={errors.experience ? 'experience-error' : undefined}
           />
-          {errors.experience && <p className="mt-2 text-sm text-red-600">{errors.experience.message}</p>}
+          {errors.experience && <p id="experience-error" className="mt-2 text-sm text-red-600" role="alert">{errors.experience.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
+          <label htmlFor="careerGoal" className="block text-sm font-medium text-gray-900 mb-2">
             Career Goal <span className="text-gray-400 text-xs">(Optional)</span>
           </label>
           <textarea
+            id="careerGoal"
             {...register('careerGoal')}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
             placeholder="What are your career aspirations..."
