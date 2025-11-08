@@ -53,7 +53,7 @@ export const DEFAULT_GEMINI_MODELS = {
   vision: GEMINI_MODELS.GEMINI_1_5_FLASH,
 
   // Cost-effective for simple tasks
-  cheap: GEMINI_MODELS.GEMINI_1_5_FLASH_8B,
+  cheap: GEMINI_MODELS.GEMINI_1_5_FLASH,
 } as const;
 
 // Advanced generation options (similar to OpenAI interface)
@@ -209,9 +209,9 @@ export async function createGeminiChatCompletion(
 export async function createGeminiVisionCompletion(
   text: string,
   images: Array<{ mimeType: string; data: string }>,
-  options: Omit<GeminiGenerationOptions, 'model'> = {}
+  options: GeminiGenerationOptions = {}
 ): Promise<{ content: string }> {
-  const model = options.model || DEFAULT_GEMINI_MODELS.vision;
+  const { model = DEFAULT_GEMINI_MODELS.vision, ...restOptions } = options;
   const client = getGeminiClient();
 
   const parts = [
@@ -232,7 +232,7 @@ export async function createGeminiVisionCompletion(
         parts,
       },
     ],
-    config: buildGenerationConfig(options),
+    config: buildGenerationConfig(restOptions),
   });
 
   const content = result.text || '';
@@ -248,12 +248,16 @@ export async function* createGeminiStreamingCompletion(
 ): AsyncGenerator<string, void, unknown> {
   const model = options.model || DEFAULT_GEMINI_MODELS.standard;
   const client = getGeminiClient();
-  const contents = convertMessagesToContents(
-    messages.map(message => ({
-      role: message.role,
-      parts: message.content,
-    }))
-  );
+  const geminiMessages = messages.map(message => {
+    if (message.role === 'system') {
+      return { role: 'system' as const, parts: message.content };
+    }
+    if (message.role === 'assistant') {
+      return { role: 'model' as const, parts: message.content };
+    }
+    return { role: 'user' as const, parts: message.content };
+  });
+  const contents = convertMessagesToContents(geminiMessages);
 
   try {
     const stream = await client.models.generateContentStream({

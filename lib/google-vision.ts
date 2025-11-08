@@ -105,10 +105,10 @@ export async function detectFaces(
 
     const faces = result.faceAnnotations || [];
     return faces.map(face => ({
-      joyLikelihood: face.joyLikelihood || 'UNKNOWN',
-      sorrowLikelihood: face.sorrowLikelihood || 'UNKNOWN',
-      angerLikelihood: face.angerLikelihood || 'UNKNOWN',
-      surpriseLikelihood: face.surpriseLikelihood || 'UNKNOWN',
+      joyLikelihood: face.joyLikelihood ? String(face.joyLikelihood) : 'UNKNOWN',
+      sorrowLikelihood: face.sorrowLikelihood ? String(face.sorrowLikelihood) : 'UNKNOWN',
+      angerLikelihood: face.angerLikelihood ? String(face.angerLikelihood) : 'UNKNOWN',
+      surpriseLikelihood: face.surpriseLikelihood ? String(face.surpriseLikelihood) : 'UNKNOWN',
       boundingPoly: face.boundingPoly,
     }));
   } catch (error) {
@@ -135,7 +135,7 @@ export async function detectLandmarks(
     return landmarks.map(landmark => ({
       description: landmark.description || '',
       score: landmark.score || 0,
-      locations: landmark.locations,
+      locations: landmark.locations ? [...landmark.locations] : undefined,
     }));
   } catch (error) {
     console.error('Error detecting landmarks:', error);
@@ -169,11 +169,11 @@ export async function detectSafeSearch(
     }
 
     return {
-      adult: safeSearch.adult || 'UNKNOWN',
-      violence: safeSearch.violence || 'UNKNOWN',
-      racy: safeSearch.racy || 'UNKNOWN',
-      spoof: safeSearch.spoof || 'UNKNOWN',
-      medical: safeSearch.medical || 'UNKNOWN',
+      adult: safeSearch.adult ? String(safeSearch.adult) : 'UNKNOWN',
+      violence: safeSearch.violence ? String(safeSearch.violence) : 'UNKNOWN',
+      racy: safeSearch.racy ? String(safeSearch.racy) : 'UNKNOWN',
+      spoof: safeSearch.spoof ? String(safeSearch.spoof) : 'UNKNOWN',
+      medical: safeSearch.medical ? String(safeSearch.medical) : 'UNKNOWN',
     };
   } catch (error) {
     console.error('Error detecting safe search:', error);

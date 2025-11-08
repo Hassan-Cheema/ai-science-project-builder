@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
   // Test 3: Package Imports
   const packages = [
-    '@google/generative-ai',
+    '@google/genai',
     '@google-cloud/storage',
     '@google-cloud/translate',
     '@google-cloud/vision',

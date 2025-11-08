@@ -1,21 +1,21 @@
 // Google Cloud Speech-to-Text API Client
-import speech from '@google-cloud/speech';
+import { SpeechClient } from '@google-cloud/speech';
 
 // Initialize Speech-to-Text client
-let speechClient: speech.SpeechClient | null = null;
+let speechClient: SpeechClient | null = null;
 
-function getSpeechClient(): speech.SpeechClient {
+function getSpeechClient(): SpeechClient {
   if (!speechClient) {
     const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
 
     if (credentialsPath) {
-      speechClient = new speech.SpeechClient({
+      speechClient = new SpeechClient({
         keyFilename: credentialsPath,
         projectId,
       });
     } else if (projectId) {
-      speechClient = new speech.SpeechClient({
+      speechClient = new SpeechClient({
         projectId,
       });
     } else {
@@ -223,20 +223,21 @@ export async function getOperationStatus(operationName: string): Promise<{
 }> {
   try {
     const client = getSpeechClient();
-    const [operation] = await client.checkLongRunningRecognizeProgress(operationName);
+    const operation = await client.checkLongRunningRecognizeProgress(operationName);
+    const latestResponse = operation.latestResponse;
 
-    if (!operation.done) {
+    if (!latestResponse?.done) {
       return { done: false };
     }
 
-    if (operation.error) {
+    if (latestResponse.error) {
       return {
         done: true,
-        error: operation.error.message || 'Unknown error',
+        error: latestResponse.error.message || 'Unknown error',
       };
     }
 
-    const response = operation.response as any;
+    const response = latestResponse.response as any;
     if (!response.results || response.results.length === 0) {
       return {
         done: true,

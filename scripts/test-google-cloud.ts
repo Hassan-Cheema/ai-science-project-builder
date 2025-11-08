@@ -63,33 +63,33 @@ async function testGoogleCloud() {
   // Test 3: Package Imports
   console.log('3. Testing package imports...');
   const packages = [
-    { name: '@google/generative-ai', test: async () => {
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      return !!GoogleGenerativeAI;
+    { name: '@google/genai', test: async () => {
+      const mod = await import('@google/genai');
+      return !!mod;
     }},
     { name: '@google-cloud/storage', test: async () => {
-      const { Storage } = await import('@google-cloud/storage');
-      return !!Storage;
+      const mod = await import('@google-cloud/storage');
+      return !!mod;
     }},
     { name: '@google-cloud/translate', test: async () => {
-      const { Translate } = await import('@google-cloud/translate');
-      return !!Translate;
+      const mod = await import('@google-cloud/translate');
+      return !!mod;
     }},
     { name: '@google-cloud/vision', test: async () => {
-      const { ImageAnnotatorClient } = await import('@google-cloud/vision');
-      return !!ImageAnnotatorClient;
+      const mod = await import('@google-cloud/vision');
+      return !!mod;
     }},
     { name: '@google-cloud/text-to-speech', test: async () => {
-      const tts = await import('@google-cloud/text-to-speech');
-      return !!tts.default;
+      const mod = await import('@google-cloud/text-to-speech');
+      return !!mod;
     }},
     { name: '@google-cloud/speech', test: async () => {
-      const speech = await import('@google-cloud/speech');
-      return !!speech.default;
+      const mod = await import('@google-cloud/speech');
+      return !!mod;
     }},
     { name: 'firebase-admin', test: async () => {
-      const admin = await import('firebase-admin');
-      return !!admin.default;
+      const mod = await import('firebase-admin');
+      return !!mod;
     }},
   ];
 

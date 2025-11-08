@@ -96,11 +96,19 @@ export async function translateMultiple(
     const [translations] = await translate.translate(texts, options);
     const [detections] = await translate.detect(texts);
 
-    return texts.map((text, index) => ({
-      originalText: text,
-      translatedText: Array.isArray(translations) ? translations[index] : translations,
-      detectedLanguage: Array.isArray(detections) ? detections[index]?.language : detections?.language,
-    }));
+    return texts.map((text, index) => {
+      const translationEntry = Array.isArray(translations) ? translations[index] : translations;
+      const detectionEntry = Array.isArray(detections) ? detections[index] : detections;
+
+      const detectedLanguage =
+        (detectionEntry as { language?: string } | undefined)?.language;
+
+      return {
+        originalText: text,
+        translatedText: translationEntry,
+        detectedLanguage,
+      };
+    });
   } catch (error) {
     console.error('Error translating multiple texts:', error);
     throw error;

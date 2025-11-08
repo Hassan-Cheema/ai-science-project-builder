@@ -1,21 +1,21 @@
 // Google Cloud Text-to-Speech API Client
-import textToSpeechLib from '@google-cloud/text-to-speech';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 // Initialize Text-to-Speech client
-let ttsClient: textToSpeechLib.TextToSpeechClient | null = null;
+let ttsClient: TextToSpeechClient | null = null;
 
-function getTTSClient(): textToSpeechLib.TextToSpeechClient {
+function getTTSClient(): TextToSpeechClient {
   if (!ttsClient) {
     const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
 
     if (credentialsPath) {
-      ttsClient = new textToSpeechLib.TextToSpeechClient({
+      ttsClient = new TextToSpeechClient({
         keyFilename: credentialsPath,
         projectId,
       });
     } else if (projectId) {
-      ttsClient = new textToSpeechLib.TextToSpeechClient({
+      ttsClient = new TextToSpeechClient({
         projectId,
       });
     } else {
@@ -192,7 +192,9 @@ export async function listVoices(languageCode?: string): Promise<Array<{
 
     return (result.voices || []).map(voice => ({
       name: voice.name || '',
-      ssmlGender: voice.ssmlGender || 'SSML_VOICE_GENDER_UNSPECIFIED',
+      ssmlGender: voice.ssmlGender
+        ? String(voice.ssmlGender)
+        : 'SSML_VOICE_GENDER_UNSPECIFIED',
       naturalSampleRateHertz: voice.naturalSampleRateHertz || 0,
       languageCodes: voice.languageCodes || [],
     }));

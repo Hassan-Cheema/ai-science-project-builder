@@ -80,7 +80,7 @@ export async function saveDocument<T extends Record<string, any>>(
 export async function getDocument<T extends Record<string, any>>(
   collectionPath: string,
   documentId: string
-): Promise<T | null> {
+): Promise<(T & { id: string }) | null> {
   try {
     const db = getFirestore();
     const doc = await db.collection(collectionPath).doc(documentId).get();
@@ -89,7 +89,11 @@ export async function getDocument<T extends Record<string, any>>(
       return null;
     }
 
-    return { id: doc.id, ...doc.data() } as T;
+    const data = doc.data() as T;
+    return {
+      ...data,
+      id: doc.id,
+    };
   } catch (error) {
     console.error('Error getting document:', error);
     throw error;
@@ -258,4 +262,3 @@ export function getDocumentRef(
 
 // Export Firestore for direct use if needed
 export { getFirestore };
-
